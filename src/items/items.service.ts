@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
 import { Item } from './item.entity';
+import { GetItemsDto } from './dto/get-items.dto';
 
 @Injectable()
 export class ItemsService {
@@ -23,7 +24,11 @@ export class ItemsService {
     search: string,
     sort: string,
     filters: Record<string, any>,
-  ): Promise<any> {
+  ): Promise<GetItemsDto> {
+    // Fix
+    // 1. any
+    // 2. delete
+
     delete filters.sort;
     delete filters.search;
 

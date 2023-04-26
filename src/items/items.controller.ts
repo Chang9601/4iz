@@ -2,10 +2,11 @@ import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { Item } from './item.entity';
 import { Pagination } from 'src/constants/pagination';
+import { GetItemsDto } from './dto/get-items.dto';
 
 @Controller('items')
 export class ItemsController {
-  constructor(private itemsService: ItemsService) {}
+  constructor(private readonly itemsService: ItemsService) {}
 
   @Get('/:id')
   @HttpCode(200)
@@ -21,7 +22,7 @@ export class ItemsController {
     @Query('search') search: string = Pagination.SEARCH,
     @Query('sort') sort: string = Pagination.SORT,
     @Query() filters: Record<string, any>,
-  ): Promise<Item[]> {
+  ): Promise<GetItemsDto> {
     return this.itemsService.getItems(limit, offset, search, sort, filters);
   }
 }

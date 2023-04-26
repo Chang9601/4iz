@@ -4,10 +4,12 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemsModule } from './items/items.module';
+import { CartsModule } from './carts/carts.module';
 
 @Module({
   imports: [
     ItemsModule,
+    CartsModule,
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -19,7 +21,7 @@ import { ItemsModule } from './items/items.module';
         database: configService.get('DB_DATABASE'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
-        entities: [__dirname + '/items/*.entity.{js,ts}'],
+        entities: ['dist/**/*.entity.{js,ts}'],
         synchronize: true,
       }),
     }),

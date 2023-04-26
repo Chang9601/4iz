@@ -1,6 +1,6 @@
-import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { Item } from './item.entity';
 import { Repository } from 'typeorm';
+import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { ClauseBuilder } from 'src/utils/clauseBuilder';
 
 @CustomRepository(Item)
@@ -120,12 +120,12 @@ export class ItemRepository extends Repository<Item> {
       .offset((offset - 1) * limit);
 
     const total = await query.getCount();
-    const result = await query.getRawMany();
+    const items: Item[] = await query.getRawMany();
 
     return {
       total,
       offset,
-      result,
+      items,
     };
   }
 }

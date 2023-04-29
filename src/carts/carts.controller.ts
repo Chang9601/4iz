@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UsePipes,
   ValidationPipe,
@@ -12,6 +13,7 @@ import {
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { Cart } from './cart.entity';
+import { UpdateCartDto } from './dto/update-cart.dto';
 
 @Controller('carts')
 export class CartsController {
@@ -28,5 +30,15 @@ export class CartsController {
   @HttpCode(204)
   deleteCart(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.cartsService.deleteCart(id);
+  }
+
+  @Patch('/:id')
+  @UsePipes(ValidationPipe)
+  @HttpCode(200)
+  updateCart(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCartDto: UpdateCartDto,
+  ): Promise<Cart> {
+    return this.cartsService.updateCart(id, updateCartDto);
   }
 }

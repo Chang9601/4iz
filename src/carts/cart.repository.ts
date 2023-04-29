@@ -28,17 +28,17 @@ export class CartRepository extends Repository<Cart> {
           },
         });
 
-        const cart = await manager.create(Cart, {
+        const cart = manager.create(Cart, {
           totalPrice: quantity * item.price,
           totalQuantity: quantity,
         });
 
         // User: Many-to-One
         cart.options = [option];
-
         carts.push(cart);
-        await manager.save(cart);
       }
+
+      await manager.save(carts);
     });
 
     return carts;

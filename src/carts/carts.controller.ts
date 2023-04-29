@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
+  Param,
+  ParseIntPipe,
   Post,
   UsePipes,
   ValidationPipe,
@@ -19,5 +22,11 @@ export class CartsController {
   @HttpCode(201)
   createCart(@Body() createCartDto: CreateCartDto): Promise<Cart[]> {
     return this.cartsService.createCart(createCartDto);
+  }
+
+  @Delete('/:id')
+  @HttpCode(204)
+  deleteCart(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.cartsService.deleteCart(id);
   }
 }

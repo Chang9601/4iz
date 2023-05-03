@@ -1,13 +1,13 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsArray, IsNumber } from 'class-validator';
 import { Item } from '../item.entity';
 
 export class GetItemsDto {
-  @IsNotEmpty()
+  @IsNumber()
   total: number;
 
-  @IsNotEmpty()
+  @IsNumber()
   offset: number;
 
-  @IsNotEmpty()
+  @IsArray()
   items: Item[];
 }

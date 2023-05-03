@@ -5,11 +5,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemsModule } from './items/items.module';
 import { CartsModule } from './carts/carts.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ItemsModule,
     CartsModule,
+    AuthModule,
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

@@ -4,10 +4,15 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
+  JoinColumn,
+  //Index,
 } from 'typeorm';
+import { User } from 'src/auth/user.entity';
 import { Option } from 'src/items/option.entity';
 
 @Entity('carts')
+//@Index(['user', 'options.id'], { unique: true }) -> Correct syntax?
 export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
@@ -39,7 +44,9 @@ export class Cart {
   })
   updatedAt: Date | null;
 
-  // User Entity: Many-to-One
+  @ManyToOne(() => User, (user) => user.carts)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @ManyToMany(() => Option)
   @JoinTable({

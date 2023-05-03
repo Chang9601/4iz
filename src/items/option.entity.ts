@@ -4,10 +4,12 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Item } from './item.entity';
 
 @Entity('options')
+@Index(['item.id', 'color', 'size'], { unique: true })
 export class Option {
   @PrimaryGeneratedColumn()
   id: number;

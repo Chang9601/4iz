@@ -9,7 +9,7 @@ export class CartsService {
   constructor(private readonly cartRepository: CartRepository) {}
 
   async getCartById(id: number): Promise<Cart> {
-    const cart = await this.cartRepository.findOneBy({ id: id });
+    const cart = await this.cartRepository.findOneBy({ id });
 
     if (!cart) {
       throw new NotFoundException(`Cart with id ${id} not found`);

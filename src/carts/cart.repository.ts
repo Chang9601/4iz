@@ -2,16 +2,23 @@ import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { Cart } from './cart.entity';
 import { Repository } from 'typeorm';
 import { Item } from 'src/items/item.entity';
-import { CreateCartDto } from './dto/create-cart.dto';
+import { RequestCreateCartDto } from './dto/request.create-cart.dto';
 import { Option } from 'src/items/option.entity';
+import { User } from 'src/auth/user.entity';
+import { GetCartsDto } from './dto/get-carts-dto';
+import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
 
 @CustomRepository(Cart)
 export class CartRepository extends Repository<Cart> {
-  async createCart(createCartDto: CreateCartDto) {
+  async createCart(
+    requestCreateCartDto: RequestCreateCartDto,
+    user: User,
+  ): Promise<ResponseCreateCartDto[]> {
     const carts: Cart[] = [];
+    const response: ResponseCreateCartDto[] = [];
 
     await this.manager.transaction(async (manager) => {
-      const { itemId, options } = createCartDto;
+      const { itemId, options } = requestCreateCartDto;
       const [item] = await manager.find(Item, { where: { id: itemId } });
 
       for (let optionIndex = 0; optionIndex < options.length; optionIndex++) {
@@ -31,16 +38,103 @@ export class CartRepository extends Repository<Cart> {
         const cart = manager.create(Cart, {
           totalPrice: quantity * item.price,
           totalQuantity: quantity,
+          user: user,
+          options: [option],
         });
 
-        // User: Many-to-One
-        cart.options = [option];
+        response.push({
+          totalPrice: cart.totalPrice,
+          totalQuantity: cart.totalQuantity,
+          option: option,
+        });
         carts.push(cart);
       }
 
       await manager.save(carts);
     });
 
-    return carts;
+    return response;
+  }
+
+  async getCarts(
+    limit: number,
+    offset: number,
+    user: User,
+  ): Promise<GetCartsDto> {
+    const query = this.createQueryBuilder('cart')
+      .select([
+        'cart.id AS cart_id',
+        'item_subquery.item_id',
+        'cart_option_subquery.size',
+        'cart_option_subquery.color',
+        'cart_option_subquery.stock',
+        'item_subquery.name',
+        'item_subquery.price',
+        'IF(item_subquery.discount_rate > 0, cart.total_price * (1 - item_subquery.discount_rate / 100), cart.total_price) AS discounted_total_price',
+        'cart.total_price AS total_price',
+        'cart.total_quantity AS total_quantity',
+        'image_subquery.urls',
+      ])
+      .innerJoin('users', 'user', 'user.id = cart.user_id')
+      .innerJoin(
+        (subQuery) =>
+          subQuery
+            .select([
+              'cart_options.cart_id AS cart_id',
+              'cart_options.option_id AS option_id',
+              'options.size AS size',
+              'options.color AS color',
+              'options.stock AS stock',
+            ])
+            .from('cart_options', 'cart_options')
+            .innerJoin(
+              'options',
+              'options',
+              'cart_options.option_id = options.id',
+            ),
+        'cart_option_subquery',
+        'cart_option_subquery.cart_id = cart.id',
+      )
+      .innerJoin(
+        (subQuery) =>
+          subQuery
+            .select([
+              'items.id AS item_id',
+              'items.name AS name',
+              'items.price AS price',
+              'items.discount_rate AS discount_rate',
+              'options.id AS option_id',
+            ])
+            .from('options', 'options')
+            .innerJoin('items', 'items', 'items.id = options.item_id'),
+        'item_subquery',
+        'item_subquery.option_id = cart_option_subquery.option_id',
+      )
+      .innerJoin(
+        (subQuery) =>
+          subQuery
+            .select([
+              'items.id AS item_id',
+              'JSON_ARRAYAGG(images.url) AS urls',
+            ])
+            .from('images', 'images')
+            .innerJoin('items', 'items', 'items.id = images.item_id')
+            .groupBy('images.item_id'),
+        'image_subquery',
+        'image_subquery.item_id = item_subquery.item_id',
+      )
+
+      .where('user.id = :id', { id: user.id })
+      .limit(limit)
+      .offset((offset - 1) * limit);
+
+    const total = await query.getCount();
+    const carts: Cart[] = await query.getRawMany();
+
+    return {
+      total,
+      offset,
+      carts,
+    };
   }
 }

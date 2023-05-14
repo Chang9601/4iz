@@ -88,30 +88,38 @@ export class ItemRepository extends Repository<Item> {
         'IF(item.discount_rate > 0, item.price * (1 - item.discount_rate / 100), item.price) AS discounted_price',
         'DATE_FORMAT(item.release_date, "%Y-%m-%d") AS release_date',
         'COUNT(DISTINCT(option.color)) AS color_count',
-        'ij.urls AS images',
-        'icj.categories AS categories',
+        'image_subquery.urls',
+        'item_category_subquery.categories',
       ])
       .innerJoin('options', 'option', 'option.item_id = item.id')
       .innerJoin(
         (subQuery) =>
           subQuery
-            .select('i.item_id')
-            .addSelect('JSON_ARRAYAGG(i.url)', 'urls')
-            .from('images', 'i')
-            .groupBy('i.item_id'),
-        'ij',
-        'ij.item_id = item.id',
+            .select([
+              'images.item_id AS item_id',
+              'JSON_ARRAYAGG(images.url) AS urls',
+            ])
+            .from('images', 'images')
+            .groupBy('images.item_id'),
+        'image_subquery',
+        'image_subquery.item_id = item.id',
       )
       .innerJoin(
         (subQuery) =>
           subQuery
-            .select('ic.item_id')
-            .addSelect('JSON_ARRAYAGG(c.name)', 'categories')
-            .from('item_categories', 'ic')
-            .innerJoin('categories', 'c', 'ic.category_id = c.id')
-            .groupBy('ic.item_id'),
-        'icj',
-        'icj.ic_item_id = item.id',
+            .select([
+              'item_categories.item_id AS item_id',
+              'JSON_ARRAYAGG(categories.name) AS categories',
+            ])
+            .from('item_categories', 'item_categories')
+            .innerJoin(
+              'categories',
+              'categories',
+              'item_categories.category_id = categories.id',
+            )
+            .groupBy('item_categories.item_id'),
+        'item_category_subquery',
+        'item_category_subquery.item_id = item.id',
       )
       .where(whereClause)
       .groupBy('item.id')

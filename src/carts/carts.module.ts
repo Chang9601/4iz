@@ -3,9 +3,11 @@ import { CartsController } from './carts.controller';
 import { CartsService } from './carts.service';
 import { TypeOrmExModule } from 'src/db/typeorm-ex.module';
 import { CartRepository } from './cart.repository';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmExModule.forCustomRepository([CartRepository])],
+  // Import AuthModule to use it in CartsModule
+  imports: [TypeOrmExModule.forCustomRepository([CartRepository]), AuthModule],
   controllers: [CartsController],
   providers: [CartsService],
 })

@@ -8,12 +8,14 @@ import { GetItemsDto } from './dto/get-items.dto';
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
+  // Response DTO
   @Get('/:id')
   @HttpCode(200)
   getItemById(@Param('id') id: number): Promise<Item> {
     return this.itemsService.getItemById(id);
   }
 
+  // Response DTO
   @Get('/')
   @HttpCode(200)
   getItems(

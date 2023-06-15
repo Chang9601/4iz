@@ -1,6 +1,6 @@
 import { Item } from './item.entity';
 import { Repository } from 'typeorm';
-import { ClauseBuilder } from 'src/utils/clauseBuilder';
+import { ClauseBuilder } from 'src/utils/clause-builder';
 import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 
 @CustomRepository(Item)

@@ -7,6 +7,7 @@ import { Option } from 'src/items/option.entity';
 import { User } from 'src/auth/user.entity';
 import { GetCartsDto } from './dto/get-carts-dto';
 import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @CustomRepository(Cart)
 export class CartRepository extends Repository<Cart> {
@@ -35,6 +36,10 @@ export class CartRepository extends Repository<Cart> {
           },
         });
 
+        if (option.stock < 0) {
+          throw new InternalServerErrorException('Out of stock');
+        }
+
         const cart = manager.create(Cart, {
           totalPrice: quantity * item.price,
           totalQuantity: quantity,
@@ -47,10 +52,11 @@ export class CartRepository extends Repository<Cart> {
           totalQuantity: cart.totalQuantity,
           option: option,
         });
+
         carts.push(cart);
       }
 
-      await manager.save(carts);
+      await manager.save(Cart, carts);
     });
 
     return response;

@@ -1,4 +1,6 @@
+// OK
 import { Cart } from 'src/carts/cart.entity';
+import { Order } from 'src/orders/order.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('users')
@@ -6,19 +8,19 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, nullable: false })
+  @Column({ type: 'varchar', length: 300, nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', length: 300, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 500, unique: true, nullable: false })
   email: string;
 
   @Column({ type: 'varchar', length: 500, nullable: false })
   password: string;
 
   @Column({
-    name: 'phone_number',
     type: 'varchar',
-    length: 200,
+    name: 'phone_number',
+    length: 300,
     nullable: false,
   })
   phoneNumber: string;
@@ -27,15 +29,15 @@ export class User {
   birthday: Date;
 
   @Column({
-    name: 'created_at',
     type: 'timestamp',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @Column({
-    name: 'updated_at',
     type: 'timestamp',
+    name: 'updated_at',
     nullable: true,
     onUpdate: 'CURRENT_TIMESTAMP',
   })
@@ -43,4 +45,7 @@ export class User {
 
   @OneToMany(() => Cart, (cart) => cart.user)
   carts: Cart[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }

@@ -16,12 +16,12 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'total_quantity', type: 'int', nullable: false })
+  @Column({ type: 'int', name: 'total_quantity', nullable: false })
   totalQuantity: number;
 
   @Column({
-    name: 'total_price',
     type: 'decimal',
+    name: 'total_price',
     precision: 65,
     scale: 3,
     nullable: false,
@@ -29,36 +29,36 @@ export class Order {
   totalPrice: number;
 
   @Column({
-    name: 'order_number',
     type: 'varchar',
-    length: 300,
+    name: 'order_number',
+    length: 500,
     nullable: false,
   })
   orderNumber: string;
 
   @Column({
-    name: 'order_date',
     type: 'timestamp',
+    name: 'order_date',
     default: () => 'CURRENT_TIMESTAMP',
   })
   orderDate: Date;
 
   @Column({
-    name: 'created_at',
     type: 'timestamp',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @Column({
-    name: 'updated_at',
     type: 'timestamp',
+    name: 'updated_at',
     nullable: true,
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date | null;
 
-  @ManyToOne(() => User, (user) => user.carts)
+  @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn({ name: 'user_id' })
   user: User;
 

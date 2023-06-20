@@ -5,6 +5,6 @@ export class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 300, unique: true, nullable: false })
   name: string;
 }

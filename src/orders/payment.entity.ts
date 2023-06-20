@@ -13,8 +13,8 @@ export class Payment {
   id: number;
 
   @Column({
-    name: 'total_amount',
     type: 'decimal',
+    name: 'total_amount',
     precision: 65,
     scale: 3,
     nullable: false,
@@ -22,38 +22,38 @@ export class Payment {
   totalAmount: number;
 
   @Column({
-    name: 'payment_number',
     type: 'varchar',
-    length: 300,
+    name: 'payment_number',
+    length: 500,
     nullable: false,
   })
   paymentNumber: string;
 
   @Column({
-    name: 'payment_method',
     type: 'varchar',
-    length: 200,
+    name: 'payment_method',
+    length: 300,
     nullable: false,
   })
   paymentMethod: string;
 
   @Column({
-    name: 'payment_date',
     type: 'timestamp',
+    name: 'payment_date',
     default: () => 'CURRENT_TIMESTAMP',
   })
   paymentDate: Date;
 
   @Column({
-    name: 'created_at',
     type: 'timestamp',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @Column({
-    name: 'updated_at',
     type: 'timestamp',
+    name: 'updated_at',
     nullable: true,
     onUpdate: 'CURRENT_TIMESTAMP',
   })

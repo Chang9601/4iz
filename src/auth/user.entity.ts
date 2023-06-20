@@ -1,4 +1,3 @@
-// OK
 import { Cart } from 'src/carts/cart.entity';
 import { Order } from 'src/orders/order.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';

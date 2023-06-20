@@ -1,7 +1,7 @@
 import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { SignUpDto } from './dto/signup.dto';
+import { SignUpDto } from './dtos/signup.dto';
 import {
   ConflictException,
   InternalServerErrorException,

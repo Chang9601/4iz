@@ -1,11 +1,20 @@
-import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 import { OrderStatusLabel } from 'src/utils/enum';
+import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class ResponseCreateOrderDto {
   @IsNumber()
+  @IsPositive({ message: ValidationErrorMessage.POSITIVE_NUMBER })
   totalPrice: number;
 
   @IsNumber()
+  @IsPositive({ message: ValidationErrorMessage.POSITIVE_NUMBER })
   totalQuantity: number;
 
   @IsString()

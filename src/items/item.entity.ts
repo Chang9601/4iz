@@ -15,7 +15,7 @@ export class Item {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 300, unique: true, nullable: false })
   name: string;
 
   @Column({ type: 'decimal', precision: 65, scale: 3, nullable: false })
@@ -27,25 +27,25 @@ export class Item {
   @Column({ type: 'text', nullable: false })
   description: string;
 
-  @Column({ name: 'is_new', default: false, nullable: false })
+  @Column({ type: 'boolean', name: 'is_new', default: false, nullable: false })
   isNew: boolean;
 
-  @Column({ name: 'discount_rate', type: 'int', default: 0, nullable: false })
+  @Column({ type: 'int', name: 'discount_rate', default: 0, nullable: false })
   discountRate: number;
 
-  @Column({ name: 'release_date', type: 'date', nullable: false })
+  @Column({ type: 'date', name: 'release_date', nullable: false })
   releaseDate: Date;
 
   @Column({
-    name: 'created_at',
     type: 'timestamp',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @Column({
-    name: 'updated_at',
     type: 'timestamp',
+    name: 'updated_at',
     nullable: true,
     onUpdate: 'CURRENT_TIMESTAMP',
   })

@@ -13,41 +13,41 @@ export class Shipment {
   id: number;
 
   @Column({
-    name: 'name',
     type: 'varchar',
+    name: 'name',
     length: 200,
     nullable: false,
   })
   name: string;
 
   @Column({
-    name: 'street',
     type: 'varchar',
-    length: 300,
+    name: 'street',
+    length: 500,
     nullable: false,
   })
   street: string;
 
   @Column({
-    name: 'address',
     type: 'varchar',
-    length: 300,
+    name: 'address',
+    length: 500,
     nullable: false,
   })
   address: string;
 
   @Column({
-    name: 'zipcode',
     type: 'varchar',
-    length: 100,
+    name: 'zipcode',
+    length: 300,
     nullable: false,
   })
   zipcode: string;
 
   @Column({
-    name: 'phone_number',
     type: 'varchar',
-    length: 200,
+    name: 'phone_number',
+    length: 300,
     nullable: false,
   })
   phoneNumber: string;
@@ -59,30 +59,30 @@ export class Shipment {
   detail: string;
 
   @Column({
-    name: 'tracking_number',
     type: 'varchar',
-    length: 300,
+    name: 'tracking_number',
+    length: 500,
     nullable: false,
   })
   trackingNumber: string;
 
   @Column({
-    name: 'shipment_date',
     type: 'timestamp',
+    name: 'shipment_date',
     default: () => 'CURRENT_TIMESTAMP',
   })
   shipmentDate: Date;
 
   @Column({
-    name: 'created_at',
     type: 'timestamp',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @Column({
-    name: 'updated_at',
     type: 'timestamp',
+    name: 'updated_at',
     nullable: true,
     onUpdate: 'CURRENT_TIMESTAMP',
   })

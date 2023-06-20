@@ -7,8 +7,8 @@ export class OrderStatus {
   id: number;
 
   @Column({
-    name: 'status',
     type: 'varchar',
+    name: 'status',
     length: 100,
     unique: true,
     nullable: false,

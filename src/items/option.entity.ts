@@ -14,10 +14,10 @@ export class Option {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, nullable: false })
+  @Column({ type: 'varchar', length: 300, nullable: false })
   color: string;
 
-  @Column({ type: 'varchar', length: 200, nullable: false })
+  @Column({ type: 'varchar', length: 300, nullable: false })
   size: string;
 
   @Column({ type: 'int', nullable: false })

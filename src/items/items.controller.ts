@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { Item } from './item.entity';
-import { Pagination } from 'src/constants/pagination';
+import { Pagination } from 'src/utils/constants/pagination';
 import { GetItemsDto } from './dto/get-items.dto';
 
 @Controller('items')

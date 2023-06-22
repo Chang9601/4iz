@@ -5,7 +5,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { OrderStatusLabel } from 'src/utils/enum';
+import { OrderStatusLabel } from 'src/utils/constants/order-status-enum';
 import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class ResponseCreateOrderDto {

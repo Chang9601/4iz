@@ -21,7 +21,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { GetCartsDto } from './dto/get-carts-dto';
-import { Pagination } from 'src/constants/pagination';
+import { Pagination } from 'src/utils/constants/pagination';
 import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
 
 @Controller('carts')

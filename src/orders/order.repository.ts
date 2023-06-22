@@ -8,10 +8,11 @@ import { Cart } from 'src/carts/cart.entity';
 import { Payment } from './payment.entity';
 import { Shipment } from './shipment.entity';
 import { generateNumber } from 'src/utils/number-generator';
-import { OrderStatusLabel, PaymentMethodLabel } from 'src/utils/enum';
 import { OrderStatus } from './order-status.entity';
 import { Option } from 'src/items/option.entity';
 import { InternalServerErrorException } from '@nestjs/common';
+import { PaymentMethodLabel } from 'src/utils/constants/payment-method-enum';
+import { OrderStatusLabel } from 'src/utils/constants/order-status-enum';
 
 @CustomRepository(Order)
 export class OrderRepository extends Repository<Order> {

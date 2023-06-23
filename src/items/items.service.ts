@@ -1,45 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
-import { Item } from './item.entity';
 import { GetItemsDto } from './dto/get-items.dto';
+import { GetItemByIdDto } from './dto/get-item-by-id.dto';
+import { ItemProcessor } from 'src/utils/item-processor';
 
 @Injectable()
 export class ItemsService {
   constructor(private readonly itemRepository: ItemRepository) {}
 
-  // Not exactly Item, but how?
-  async getItemById(id: number): Promise<Item> {
-    const item = await this.itemRepository.getItemById(id);
+  async getItemById(id: number): Promise<GetItemByIdDto> {
+    const itemDto = await this.itemRepository.getItemById(id);
+    const item = itemDto.item;
 
     if (!item) {
       throw new NotFoundException(`Item with id ${id} not found`);
     }
 
-    return item;
+    return itemDto;
   }
 
-  async getItems(
-    limit: number,
-    offset: number,
-    search: string,
-    sort: string,
-    filters: Record<string, any>,
-  ): Promise<GetItemsDto> {
-    // Fix
-    // 1. any
-    // 2. delete
-
-    delete filters.sort;
-    delete filters.search;
-
-    const items = await this.itemRepository.getItems(
-      limit,
-      offset,
-      search,
-      sort,
-      filters,
-    );
-
-    return items;
+  async getItems(conditions: ItemProcessor): Promise<GetItemsDto> {
+    return await this.itemRepository.getItems(conditions);
   }
 }

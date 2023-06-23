@@ -1,4 +1,5 @@
-import { IsString, Matches, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsString, Matches, MinLength } from 'class-validator';
 import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class SignUpDto {
@@ -21,6 +22,7 @@ export class SignUpDto {
   })
   phoneNumber: string;
 
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: ValidationErrorMessage.BIRTHDAY })
-  birthday: string;
+  @Type(() => Date)
+  @IsDate({ message: ValidationErrorMessage.BIRTHDAY })
+  birthday: Date;
 }

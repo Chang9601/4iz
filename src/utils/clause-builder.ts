@@ -11,26 +11,29 @@ export class ClauseBuilder {
   constructor(
     private search: string,
     private sort: string,
-    private filters: Record<string, any>,
+    private category: string,
+    private size: string[],
+    private color: string[],
+    private gender: string[],
   ) {}
 
   buildSearchClause() {
-    const searchTypesLength = this.searchTypes.length;
-    const clauseStringArray: string[] = [];
+    const searchTypesCount = this.searchTypes.length;
+    const clauseArray: string[] = [];
     let clauseString = '';
 
     for (
       let searchTypeIndex = 0;
-      searchTypeIndex < searchTypesLength;
+      searchTypeIndex < searchTypesCount;
       searchTypeIndex++
     ) {
-      clauseStringArray.push(
+      clauseArray.push(
         this.searchTypes[searchTypeIndex] + ` LIKE "%${this.search}%"`,
       );
     }
 
-    if (clauseStringArray.length !== 0) {
-      clauseString = `${clauseStringArray.join(` OR `)}`;
+    if (clauseArray.length !== 0) {
+      clauseString = `${clauseArray.join(` OR `)}`;
     }
 
     return this.search === `` ? `` : `(${clauseString})`;
@@ -53,47 +56,49 @@ export class ClauseBuilder {
   }
 
   buildWhereClause() {
-    const builderSet = {
-      genderBuilder: this.buildGenderClause,
-      sizeBuilder: this.buildSizeClause,
-      colorBuilder: this.buildColorClause,
-      categoryBuilder: this.buildCategoryClause,
-    };
-
     const searchClause = this.buildSearchClause();
 
-    let filterClause = '';
-    const filterClauseStringArray = Object.entries(this.filters).map(
-      ([key, value]) => {
-        switch (key) {
-          case 'gender':
-            return builderSet['genderBuilder'](value);
-          case 'size':
-            return builderSet['sizeBuilder'](value);
-          case 'color':
-            return builderSet['colorBuilder'](value);
-          case 'category':
-            return builderSet['categoryBuilder'](value);
-          default:
-            return '';
-        }
-      },
-    );
+    const builderSet = {
+      genderBuilder: (value: string[]) =>
+        `item.gender IN (${value.map((item) => `"${item}"`).join(',')})`,
+      sizeBuilder: (value: string[]) => `option.size IN (${value.join(',')})`,
+      colorBuilder: (value: string[]) =>
+        `option.color IN (${value.map((item) => `"${item}"`).join(',')})`,
+      categoryBuilder: (value: string) => `categories LIKE "%${value}%"`,
+    };
 
-    if (filterClauseStringArray.length !== 0) {
-      filterClause = `${filterClauseStringArray.join(' AND ')}`;
+    const { category, size, color, gender } = this;
+
+    let conditionClause = '';
+    const conditionClauseArray = [
+      category && builderSet['categoryBuilder'](category),
+      size &&
+        (Array.isArray(size)
+          ? builderSet['sizeBuilder'](size)
+          : builderSet['sizeBuilder']([size])),
+      color &&
+        (Array.isArray(color)
+          ? builderSet['colorBuilder'](color)
+          : builderSet['colorBuilder']([color])),
+      gender &&
+        (Array.isArray(gender)
+          ? builderSet['genderBuilder'](gender)
+          : builderSet['genderBuilder']([gender])),
+    ].filter(Boolean);
+
+    if (conditionClauseArray.length !== 0) {
+      conditionClause = `${conditionClauseArray.join(' AND ')}`;
 
       if (searchClause.length !== 0) {
-        filterClause = ` AND (${filterClause})`;
+        conditionClause = ` AND (${conditionClause})`;
       }
     }
-
-    const completeClause = searchClause + filterClause;
+    const completeClause = searchClause + conditionClause;
 
     return completeClause;
   }
 
-  buildGroupByClause() {
+  buildSortClause() {
     switch (this.sort) {
       case 'date':
         return 'item.release_date';
@@ -106,7 +111,7 @@ export class ClauseBuilder {
     }
   }
 
-  buildSortingOrderClause() {
+  buildOrderClause() {
     switch (this.sort) {
       case 'date':
         return 'DESC';

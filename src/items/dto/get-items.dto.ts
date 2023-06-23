@@ -4,7 +4,7 @@ import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class GetItemsDto {
   @IsNumber()
-  @Min(1, { message: ValidationErrorMessage.NON_NEGATIVE_NUMBER })
+  @Min(0, { message: ValidationErrorMessage.NON_NEGATIVE_NUMBER })
   total: number;
 
   @IsNumber()

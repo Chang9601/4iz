@@ -1,30 +1,31 @@
-import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ItemsService } from './items.service';
-import { Item } from './item.entity';
-import { Pagination } from 'src/utils/constants/pagination';
 import { GetItemsDto } from './dto/get-items.dto';
+import { GetItemByIdDto } from './dto/get-item-by-id.dto';
+import { ItemProcessor } from 'src/utils/item-processor';
 
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
-  // Response DTO
   @Get('/:id')
   @HttpCode(200)
-  getItemById(@Param('id') id: number): Promise<Item> {
+  getItemById(@Param('id') id: number): Promise<GetItemByIdDto> {
     return this.itemsService.getItemById(id);
   }
 
-  // Response DTO
   @Get('/')
   @HttpCode(200)
   getItems(
-    @Query('limit') limit: number = Pagination.LIMIT,
-    @Query('offset') offset: number = Pagination.OFFSET,
-    @Query('search') search: string = Pagination.SEARCH,
-    @Query('sort') sort: string = Pagination.SORT,
-    @Query() filters: Record<string, any>,
+    @Query(new ValidationPipe({ transform: true })) conditions: ItemProcessor,
   ): Promise<GetItemsDto> {
-    return this.itemsService.getItems(limit, offset, search, sort, filters);
+    return this.itemsService.getItems(conditions);
   }
 }

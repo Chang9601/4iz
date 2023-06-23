@@ -2,11 +2,14 @@ import { Item } from './item.entity';
 import { Repository } from 'typeorm';
 import { ClauseBuilder } from 'src/utils/clause-builder';
 import { CustomRepository } from 'src/db/typeorm-ex.decorator';
+import { GetItemByIdDto } from './dto/get-item-by-id.dto';
+import { GetItemsDto } from './dto/get-items.dto';
+import { ItemProcessor } from 'src/utils/item-processor';
 
 @CustomRepository(Item)
 export class ItemRepository extends Repository<Item> {
-  async getItemById(id: number) {
-    return this.createQueryBuilder('item')
+  async getItemById(id: number): Promise<GetItemByIdDto> {
+    const item = await this.createQueryBuilder('item')
       .select([
         'item.id AS id',
         'item.name AS name',
@@ -62,20 +65,30 @@ export class ItemRepository extends Repository<Item> {
       .where('item.id = :id', { id: id })
       .groupBy('item.id')
       .getRawOne();
+
+    const getItemByIdDto: GetItemByIdDto = {
+      item: item,
+    };
+
+    return getItemByIdDto;
   }
 
-  async getItems(
-    limit: number,
-    offset: number,
-    search: string,
-    sort: string,
-    filters: Record<string, any>,
-  ) {
-    const clauseBuilder = new ClauseBuilder(search, sort, filters);
+  async getItems(conditions: ItemProcessor): Promise<GetItemsDto> {
+    const { limit, offset, search, sort, category, size, color, gender } =
+      conditions;
+
+    const clauseBuilder = new ClauseBuilder(
+      search,
+      sort,
+      category,
+      size,
+      color,
+      gender,
+    );
 
     const whereClause = clauseBuilder.buildWhereClause();
-    const groupByClause = clauseBuilder.buildGroupByClause();
-    const sortOrderClause = clauseBuilder.buildSortingOrderClause();
+    const sortClause = clauseBuilder.buildSortClause();
+    const orderClause = clauseBuilder.buildOrderClause();
 
     const query = this.createQueryBuilder('item')
       .select([
@@ -123,17 +136,19 @@ export class ItemRepository extends Repository<Item> {
       )
       .where(whereClause)
       .groupBy('item.id')
-      .orderBy(groupByClause, sortOrderClause)
+      .orderBy(sortClause, orderClause)
       .limit(limit)
       .offset((offset - 1) * limit);
 
     const total = await query.getCount();
     const items: Item[] = await query.getRawMany();
 
-    return {
-      total,
-      offset,
-      items,
+    const getItemsDto: GetItemsDto = {
+      total: total,
+      offset: offset,
+      items: items,
     };
+
+    return getItemsDto;
   }
 }

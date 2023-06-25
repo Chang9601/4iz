@@ -1,9 +1,9 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { ValidationErrorMessage } from './validation-error-message';
-import { Pagination } from './constants/pagination';
+import { ValidationErrorMessage } from '../../utils/validation-error-message';
+import { Pagination } from '../../utils/constants/pagination';
 
-export class ItemProcessor {
+export class RequestGetItemsDto {
   @IsNumber()
   @Min(1, { message: ValidationErrorMessage.POSITIVE_NUMBER })
   limit: number = Pagination.LIMIT;

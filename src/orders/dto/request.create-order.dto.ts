@@ -2,12 +2,12 @@ import { IsString, Matches, MinLength } from 'class-validator';
 import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class RequestCreateOrderDto {
-  @IsString({ message: ValidationErrorMessage.NAME_TYPE })
-  @MinLength(1, { message: ValidationErrorMessage.NAME_LENGTH })
+  @IsString({ message: ValidationErrorMessage.STRING_TYPE })
+  @MinLength(1, { message: ValidationErrorMessage.STRING_LENGTH })
   name: string;
 
-  @IsString({ message: ValidationErrorMessage.STREET_TYPE })
-  @MinLength(1, { message: ValidationErrorMessage.STREET_LENGTH })
+  @IsString({ message: ValidationErrorMessage.STRING_TYPE })
+  @MinLength(1, { message: ValidationErrorMessage.STRING_LENGTH })
   street: string;
 
   @IsString({ message: ValidationErrorMessage.ADDRESS })

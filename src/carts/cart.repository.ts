@@ -2,12 +2,12 @@ import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { Cart } from './cart.entity';
 import { Repository } from 'typeorm';
 import { Item } from 'src/items/item.entity';
-import { RequestCreateCartDto } from './dto/request.create-cart.dto';
+import { RequestCreateCartDto } from './dto/request-create-cart.dto';
 import { Option } from 'src/items/option.entity';
 import { User } from 'src/auth/user.entity';
 import { GetCartsDto } from './dto/get-carts-dto';
-import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
-import { InternalServerErrorException } from '@nestjs/common';
+import { ResponseCreateCartDto } from './dto/response-create-cart.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @CustomRepository(Cart)
 export class CartRepository extends Repository<Cart> {
@@ -16,7 +16,7 @@ export class CartRepository extends Repository<Cart> {
     user: User,
   ): Promise<ResponseCreateCartDto[]> {
     const carts: Cart[] = [];
-    const response: ResponseCreateCartDto[] = [];
+    const responseCreateCartDto: ResponseCreateCartDto[] = [];
 
     await this.manager.transaction(async (manager) => {
       const { itemId, options } = requestCreateCartDto;
@@ -36,8 +36,8 @@ export class CartRepository extends Repository<Cart> {
           },
         });
 
-        if (option.stock < 0) {
-          throw new InternalServerErrorException('Out of stock');
+        if (option.stock <= 0) {
+          throw new NotFoundException('Out of stock');
         }
 
         const cart = manager.create(Cart, {
@@ -47,7 +47,7 @@ export class CartRepository extends Repository<Cart> {
           options: [option],
         });
 
-        response.push({
+        responseCreateCartDto.push({
           totalPrice: cart.totalPrice,
           totalQuantity: cart.totalQuantity,
           option: option,
@@ -59,7 +59,7 @@ export class CartRepository extends Repository<Cart> {
       await manager.save(Cart, carts);
     });
 
-    return response;
+    return responseCreateCartDto;
   }
 
   async getCarts(
@@ -79,7 +79,7 @@ export class CartRepository extends Repository<Cart> {
         'IF(item_subquery.discount_rate > 0, cart.total_price * (1 - item_subquery.discount_rate / 100), cart.total_price) AS discounted_total_price',
         'cart.total_price AS total_price',
         'cart.total_quantity AS total_quantity',
-        'image_subquery.urls',
+        'image_subquery.urls AS images',
       ])
       .innerJoin('users', 'user', 'user.id = cart.user_id')
       .innerJoin(
@@ -137,10 +137,12 @@ export class CartRepository extends Repository<Cart> {
     const total = await query.getCount();
     const carts: Cart[] = await query.getRawMany();
 
-    return {
-      total,
-      offset,
-      carts,
+    const getCartsDto: GetCartsDto = {
+      total: total,
+      offset: offset,
+      carts: carts,
     };
+
+    return getCartsDto;
   }
 }

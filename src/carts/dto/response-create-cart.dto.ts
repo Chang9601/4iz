@@ -3,11 +3,11 @@ import { Option } from 'src/items/option.entity';
 import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class ResponseCreateCartDto {
-  @IsNumber()
+  @IsNumber({}, { message: ValidationErrorMessage.NUMBER_TYPE })
   @IsPositive({ message: ValidationErrorMessage.POSITIVE_NUMBER })
   totalPrice: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: ValidationErrorMessage.NUMBER_TYPE })
   @IsPositive({ message: ValidationErrorMessage.POSITIVE_NUMBER })
   totalQuantity: number;
 

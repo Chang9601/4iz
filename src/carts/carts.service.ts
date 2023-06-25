@@ -1,26 +1,23 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CartRepository } from './cart.repository';
-import { RequestCreateCartDto } from './dto/request.create-cart.dto';
+import { RequestCreateCartDto } from './dto/request-create-cart.dto';
 import { Cart } from './cart.entity';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { RequestUpdateCartDto } from './dto/request-update-cart.dto';
 import { User } from 'src/auth/user.entity';
 import { GetCartsDto } from './dto/get-carts-dto';
-import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
+import { ResponseCreateCartDto } from './dto/response-create-cart.dto';
+import { ResponseUpdateCartDto } from './dto/response-update-cart.dto';
 
 @Injectable()
 export class CartsService {
   constructor(private readonly cartRepository: CartRepository) {}
 
-  async getCartById(id: number): Promise<Cart> {
+  private async getCartById(id: number, user: User): Promise<Cart> {
     const [cart] = await this.cartRepository.find({
       relations: {
         user: true,
       },
-      where: { id },
+      where: { id: id, user: { id: user.id } },
     });
 
     if (!cart) {
@@ -34,6 +31,7 @@ export class CartsService {
     requestCreateCartDto: RequestCreateCartDto,
     user: User,
   ): Promise<ResponseCreateCartDto[]> {
+    await this.getCartById(requestCreateCartDto.itemId, user);
     return this.cartRepository.createCart(requestCreateCartDto, user);
   }
 
@@ -46,13 +44,10 @@ export class CartsService {
   }
 
   async deleteCart(id: number, user: User): Promise<void> {
-    const cart = await this.getCartById(id);
-
-    if (cart.user.id != user.id) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
-    const result = await this.cartRepository.delete({ id });
+    const result = await this.cartRepository.delete({
+      id,
+      user: { id: user.id },
+    });
 
     if (result.affected === 0) {
       throw new NotFoundException(`Cart with id ${id} not found`);
@@ -61,20 +56,22 @@ export class CartsService {
 
   async updateCart(
     id: number,
-    updateCartDto: UpdateCartDto,
+    requestUpdateCartDto: RequestUpdateCartDto,
     user: User,
-  ): Promise<Cart> {
-    const cart = await this.getCartById(id);
-
-    if (cart.user.id != user.id) {
-      throw new UnauthorizedException('Unauthorized');
-    }
+  ): Promise<ResponseUpdateCartDto> {
+    const cart = await this.getCartById(id, user);
 
     const price = cart.totalPrice / cart.totalQuantity;
-    cart.totalQuantity = updateCartDto.quantity;
+    cart.totalQuantity = requestUpdateCartDto.quantity;
     cart.totalPrice = price * cart.totalQuantity;
     await this.cartRepository.save(cart);
 
-    return cart;
+    const responseUpdateCartDto: ResponseUpdateCartDto = {
+      id: cart.id,
+      totalPrice: cart.totalPrice,
+      totalQuantity: cart.totalQuantity,
+    };
+
+    return responseUpdateCartDto;
   }
 }

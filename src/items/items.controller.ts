@@ -7,9 +7,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
-import { GetItemsDto } from './dto/get-items.dto';
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
-import { ItemProcessor } from 'src/utils/item-processor';
+import { RequestGetItemsDto } from './dto/request-get-items.dto';
+import { ResponseGetItemsDto } from './dto/response-get-items.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -17,15 +17,16 @@ export class ItemsController {
 
   @Get('/:id')
   @HttpCode(200)
-  getItemById(@Param('id') id: number): Promise<GetItemByIdDto> {
+  async getItemById(@Param('id') id: number): Promise<GetItemByIdDto> {
     return this.itemsService.getItemById(id);
   }
 
   @Get('/')
   @HttpCode(200)
-  getItems(
-    @Query(new ValidationPipe({ transform: true })) conditions: ItemProcessor,
-  ): Promise<GetItemsDto> {
+  async getItems(
+    @Query(new ValidationPipe({ transform: true }))
+    conditions: RequestGetItemsDto,
+  ): Promise<ResponseGetItemsDto> {
     return this.itemsService.getItems(conditions);
   }
 }

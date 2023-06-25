@@ -3,8 +3,8 @@ import { IsDate, IsString, Matches, MinLength } from 'class-validator';
 import { ValidationErrorMessage } from 'src/utils/validation-error-message';
 
 export class SignUpDto {
-  @IsString({ message: ValidationErrorMessage.NAME_TYPE })
-  @MinLength(1, { message: ValidationErrorMessage.NAME_LENGTH })
+  @IsString({ message: ValidationErrorMessage.STRING_TYPE })
+  @MinLength(1, { message: ValidationErrorMessage.STRING_LENGTH })
   name: string;
 
   @Matches(/^[\w.+-]+@[\w-]+\.[\w.-]+$/, {

@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
-import { GetItemsDto } from './dto/get-items.dto';
+
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
-import { ItemProcessor } from 'src/utils/item-processor';
+import { RequestGetItemsDto } from './dto/request-get-items.dto';
+import { ResponseGetItemsDto } from './dto/response-get-items.dto';
 
 @Injectable()
 export class ItemsService {
@@ -19,7 +20,7 @@ export class ItemsService {
     return itemDto;
   }
 
-  async getItems(conditions: ItemProcessor): Promise<GetItemsDto> {
-    return await this.itemRepository.getItems(conditions);
+  async getItems(conditions: RequestGetItemsDto): Promise<ResponseGetItemsDto> {
+    return this.itemRepository.getItems(conditions);
   }
 }

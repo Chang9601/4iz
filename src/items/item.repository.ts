@@ -3,8 +3,8 @@ import { Repository } from 'typeorm';
 import { ClauseBuilder } from 'src/utils/clause-builder';
 import { CustomRepository } from 'src/db/typeorm-ex.decorator';
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
-import { GetItemsDto } from './dto/get-items.dto';
-import { ItemProcessor } from 'src/utils/item-processor';
+import { RequestGetItemsDto } from './dto/request-get-items.dto';
+import { ResponseGetItemsDto } from './dto/response-get-items.dto';
 
 @CustomRepository(Item)
 export class ItemRepository extends Repository<Item> {
@@ -73,7 +73,7 @@ export class ItemRepository extends Repository<Item> {
     return getItemByIdDto;
   }
 
-  async getItems(conditions: ItemProcessor): Promise<GetItemsDto> {
+  async getItems(conditions: RequestGetItemsDto): Promise<ResponseGetItemsDto> {
     const { limit, offset, search, sort, category, size, color, gender } =
       conditions;
 
@@ -101,8 +101,8 @@ export class ItemRepository extends Repository<Item> {
         'IF(item.discount_rate > 0, item.price * (1 - item.discount_rate / 100), item.price) AS discounted_price',
         'DATE_FORMAT(item.release_date, "%Y-%m-%d") AS release_date',
         'COUNT(DISTINCT(option.color)) AS color_count',
-        'image_subquery.urls',
-        'item_category_subquery.categories',
+        'image_subquery.urls AS images',
+        'item_category_subquery.categories AS categories',
       ])
       .innerJoin('options', 'option', 'option.item_id = item.id')
       .innerJoin(
@@ -143,12 +143,12 @@ export class ItemRepository extends Repository<Item> {
     const total = await query.getCount();
     const items: Item[] = await query.getRawMany();
 
-    const getItemsDto: GetItemsDto = {
+    const responseGetItemsDto: ResponseGetItemsDto = {
       total: total,
       offset: offset,
       items: items,
     };
 
-    return getItemsDto;
+    return responseGetItemsDto;
   }
 }

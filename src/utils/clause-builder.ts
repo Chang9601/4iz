@@ -11,10 +11,10 @@ export class ClauseBuilder {
   constructor(
     private search: string,
     private sort: string,
-    private category: string,
-    private size: string[],
-    private color: string[],
-    private gender: string[],
+    private category?: string,
+    private size?: string[],
+    private color?: string[],
+    private gender?: string[],
   ) {}
 
   buildSearchClause() {
@@ -39,51 +39,36 @@ export class ClauseBuilder {
     return this.search === `` ? `` : `(${clauseString})`;
   }
 
-  buildGenderClause(gender: string) {
-    return `item.gender IN (${gender})`;
-  }
-
-  buildSizeClause(size: string) {
-    return `option.size IN (${size})`;
-  }
-
-  buildColorClause(color: string) {
-    return `option.color IN (${color})`;
-  }
-
-  buildCategoryClause(category: string) {
-    return `categories LIKE "%${category}%"`;
-  }
-
   buildWhereClause() {
     const searchClause = this.buildSearchClause();
 
     const builderSet = {
-      genderBuilder: (value: string[]) =>
+      genderClauseBuilder: (value: string[]) =>
         `item.gender IN (${value.map((item) => `"${item}"`).join(',')})`,
-      sizeBuilder: (value: string[]) => `option.size IN (${value.join(',')})`,
-      colorBuilder: (value: string[]) =>
+      sizeClauseBuilder: (value: string[]) =>
+        `option.size IN (${value.join(',')})`,
+      colorClauseBuilder: (value: string[]) =>
         `option.color IN (${value.map((item) => `"${item}"`).join(',')})`,
-      categoryBuilder: (value: string) => `categories LIKE "%${value}%"`,
+      categoryClauseBuilder: (value: string) => `categories LIKE "%${value}%"`,
     };
 
     const { category, size, color, gender } = this;
 
     let conditionClause = '';
     const conditionClauseArray = [
-      category && builderSet['categoryBuilder'](category),
+      category && builderSet['categoryClauseBuilder'](category),
       size &&
         (Array.isArray(size)
-          ? builderSet['sizeBuilder'](size)
-          : builderSet['sizeBuilder']([size])),
+          ? builderSet['sizeClauseBuilder'](size)
+          : builderSet['sizeClauseBuilder']([size])),
       color &&
         (Array.isArray(color)
-          ? builderSet['colorBuilder'](color)
-          : builderSet['colorBuilder']([color])),
+          ? builderSet['colorClauseBuilder'](color)
+          : builderSet['colorClauseBuilder']([color])),
       gender &&
         (Array.isArray(gender)
-          ? builderSet['genderBuilder'](gender)
-          : builderSet['genderBuilder']([gender])),
+          ? builderSet['genderClauseBuilder'](gender)
+          : builderSet['genderClauseBuilder']([gender])),
     ].filter(Boolean);
 
     if (conditionClauseArray.length !== 0) {

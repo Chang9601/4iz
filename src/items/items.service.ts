@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
 
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
-import { RequestGetItemsDto } from './dto/request-get-items.dto';
-import { ResponseGetItemsDto } from './dto/response-get-items.dto';
+import { RequestGetItemsDto } from './dto/request.get-items.dto';
+import { ResponseGetItemsDto } from './dto/response.get-items.dto';
 
 @Injectable()
 export class ItemsService {

@@ -1,14 +1,14 @@
 import { Matches } from 'class-validator';
-import { ValidationErrorMessage } from 'src/utils/validation-error-message';
+import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
 
 export class SignInDto {
   @Matches(/^[\w.+-]+@[\w-]+\.[\w.-]+$/, {
-    message: ValidationErrorMessage.EMAIL,
+    message: VALIDATION_ERROR.EMAIL,
   })
   email: string;
 
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,15}$/, {
-    message: ValidationErrorMessage.PASSWORD,
+    message: VALIDATION_ERROR.PASSWORD,
   })
   password: string;
 }

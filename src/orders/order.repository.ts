@@ -1,4 +1,4 @@
-import { CustomRepository } from 'src/db/typeorm-ex.decorator';
+import { CustomRepository } from 'src/repository/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { Order } from './order.entity';
 import { RequestCreateOrderDto } from './dto/request.create-order.dto';
@@ -10,9 +10,10 @@ import { Shipment } from './shipment.entity';
 import { generateNumber } from 'src/utils/number-generator';
 import { OrderStatus } from './order-status.entity';
 import { Option } from 'src/items/option.entity';
-import { InternalServerErrorException } from '@nestjs/common';
-import { PaymentMethodLabel } from 'src/utils/constants/payment-method-enum';
-import { OrderStatusLabel } from 'src/utils/constants/order-status-enum';
+import { PAYMENT_METHOD } from 'src/utils/constants/payment-method.enum';
+import { ORDER_STATUS } from 'src/utils/constants/order-status.enum';
+import { NotFoundException } from '@nestjs/common';
+import { RANDOM_NUMBER } from 'src/utils/constants/random-number.enum';
 
 @CustomRepository(Order)
 export class OrderRepository extends Repository<Order> {
@@ -23,7 +24,7 @@ export class OrderRepository extends Repository<Order> {
     const { name, street, address, zipcode, email, phoneNumber } =
       requestCreateOrderDto;
 
-    let orderNumber = 'dummy';
+    let orderNumber = '';
 
     await this.manager.transaction(async (manager) => {
       const carts = await manager.find(Cart, {
@@ -32,7 +33,7 @@ export class OrderRepository extends Repository<Order> {
       });
 
       const [orderStatus] = await manager.find(OrderStatus, {
-        where: { status: '결제완료' },
+        where: { status: 'PAID' },
       });
 
       const cartIds = carts.map((cart) => {
@@ -63,7 +64,7 @@ export class OrderRepository extends Repository<Order> {
         option.stock -= cart.totalQuantity;
 
         if (option.stock < 0) {
-          throw new InternalServerErrorException('Out of stock');
+          throw new NotFoundException('Out of stock');
         }
 
         await manager.update(Option, option.id, { stock: option.stock });
@@ -82,7 +83,7 @@ export class OrderRepository extends Repository<Order> {
       const newOrder = manager.create(Order, {
         totalQuantity: totalQuantity,
         totalPrice: totalPrice,
-        orderNumber: generateNumber('order'),
+        orderNumber: generateNumber(RANDOM_NUMBER.ORDER),
         orderStatus: orderStatus,
         user: user,
         options: options,
@@ -96,9 +97,9 @@ export class OrderRepository extends Repository<Order> {
       orderNumber = order.orderNumber;
 
       const payment = manager.create(Payment, {
-        paymentMethod: PaymentMethodLabel.신용카드,
+        paymentMethod: PAYMENT_METHOD.CREDIT_CARD,
         totalAmount: totalPrice,
-        paymentNumber: generateNumber('payment'),
+        paymentNumber: generateNumber(RANDOM_NUMBER.PAYMENT),
         order: order,
       });
 
@@ -109,8 +110,8 @@ export class OrderRepository extends Repository<Order> {
         zipcode: zipcode,
         email: email,
         phoneNumber: phoneNumber,
-        detail: 'detail',
-        trackingNumber: generateNumber('shipment'),
+        detail: '세부사항',
+        trackingNumber: generateNumber(RANDOM_NUMBER.SHIPMENT),
         order: order,
       });
 
@@ -136,7 +137,7 @@ export class OrderRepository extends Repository<Order> {
       totalPrice: order.total_price,
       orderNumber: order.order_number,
       orderDate: order.order_date,
-      orderStatus: OrderStatusLabel.결제완료,
+      orderStatus: ORDER_STATUS.PAID,
     };
 
     return response;

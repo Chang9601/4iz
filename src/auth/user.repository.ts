@@ -1,4 +1,4 @@
-import { CustomRepository } from 'src/db/typeorm-ex.decorator';
+import { CustomRepository } from 'src/repository/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { SignUpDto } from './dtos/signup.dto';

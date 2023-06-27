@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CartRepository } from './cart.repository';
-import { RequestCreateCartDto } from './dto/request-create-cart.dto';
+import { RequestCreateCartDto } from './dto/request.create-cart.dto';
 import { Cart } from './cart.entity';
-import { RequestUpdateCartDto } from './dto/request-update-cart.dto';
+import { RequestUpdateCartDto } from './dto/request.update-cart.dto';
 import { User } from 'src/auth/user.entity';
-import { GetCartsDto } from './dto/get-carts-dto';
-import { ResponseCreateCartDto } from './dto/response-create-cart.dto';
-import { ResponseUpdateCartDto } from './dto/response-update-cart.dto';
+import { GetCartsDto } from './dto/get-carts.dto';
+import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
+import { ResponseUpdateCartDto } from './dto/response.update-cart.dto';
+import { ItemRepository } from 'src/items/item.repository';
 
 @Injectable()
 export class CartsService {
-  constructor(private readonly cartRepository: CartRepository) {}
+  constructor(
+    private readonly cartRepository: CartRepository,
+    private readonly itemRepository: ItemRepository,
+  ) {}
 
   private async getCartById(id: number, user: User): Promise<Cart> {
     const [cart] = await this.cartRepository.find({
@@ -31,7 +35,16 @@ export class CartsService {
     requestCreateCartDto: RequestCreateCartDto,
     user: User,
   ): Promise<ResponseCreateCartDto[]> {
-    await this.getCartById(requestCreateCartDto.itemId, user);
+    const [item] = await this.itemRepository.find({
+      where: { id: requestCreateCartDto.itemId },
+    });
+
+    if (!item) {
+      throw new NotFoundException(
+        `Item with id ${requestCreateCartDto.itemId} not found`,
+      );
+    }
+
     return this.cartRepository.createCart(requestCreateCartDto, user);
   }
 

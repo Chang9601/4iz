@@ -15,12 +15,12 @@ export class AuthController {
 
   @Post('/signup')
   @HttpCode(201)
-  signUp(@Body(ValidationPipe) signUpDto: SignUpDto): Promise<void> {
+  async signUp(@Body(ValidationPipe) signUpDto: SignUpDto): Promise<void> {
     return this.authService.signUp(signUpDto);
   }
 
   @Post('/signin')
-  signIn(
+  async signIn(
     @Body(ValidationPipe) signInDto: SignInDto,
   ): Promise<{ accessToken: string }> {
     return this.authService.signIn(signInDto);

@@ -1,4 +1,4 @@
-export enum ValidationErrorMessage {
+export enum VALIDATION_ERROR {
   NUMBER_TYPE = 'Must be number',
   STRING_TYPE = 'Must be string',
   STRING_LENGTH = 'Too short, minimum length is 1 character',
@@ -6,6 +6,8 @@ export enum ValidationErrorMessage {
   ARRAY_SIZE = 'Non-empty array only',
   OPTION_TYPE = 'Must be Option object',
   OPTION_ELEMENT = 'Element must be string',
+  NAME = 'Invalid name',
+  STREET = 'Invalid street',
   ADDRESS = 'Invalid address',
   ZIPCODE = 'Invalid zipcode',
   EMAIL = 'Invalid email',

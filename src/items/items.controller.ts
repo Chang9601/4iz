@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
-import { RequestGetItemsDto } from './dto/request-get-items.dto';
-import { ResponseGetItemsDto } from './dto/response-get-items.dto';
+import { RequestGetItemsDto } from './dto/request.get-items.dto';
+import { ResponseGetItemsDto } from './dto/response.get-items.dto';
 
 @Controller('items')
 export class ItemsController {

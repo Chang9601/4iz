@@ -1,30 +1,29 @@
-import { IsString, Matches, MinLength } from 'class-validator';
-import { ValidationErrorMessage } from 'src/utils/validation-error-message';
+import { Matches } from 'class-validator';
+import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
+import { VALIDATION_REGEX } from 'src/utils/constants/validation-regex.enum';
 
 export class RequestCreateOrderDto {
-  @IsString({ message: ValidationErrorMessage.STRING_TYPE })
-  @MinLength(1, { message: ValidationErrorMessage.STRING_LENGTH })
+  @Matches(VALIDATION_REGEX.NAME, { message: VALIDATION_ERROR.NAME })
   name: string;
 
-  @IsString({ message: ValidationErrorMessage.STRING_TYPE })
-  @MinLength(1, { message: ValidationErrorMessage.STRING_LENGTH })
+  @Matches(VALIDATION_REGEX.STREET, { message: VALIDATION_ERROR.STREET })
   street: string;
 
-  @IsString({ message: ValidationErrorMessage.ADDRESS })
+  @Matches(VALIDATION_REGEX.ADDRESS, { message: VALIDATION_ERROR.ADDRESS })
   address: string;
 
-  @Matches(/^[0-9]{5}$/, {
-    message: ValidationErrorMessage.ZIPCODE,
+  @Matches(VALIDATION_REGEX.ZIPCODE, {
+    message: VALIDATION_ERROR.ZIPCODE,
   })
   zipcode: string;
 
-  @Matches(/^[\w.+-]+@[\w-]+\.[\w.-]+$/, {
-    message: ValidationErrorMessage.EMAIL,
+  @Matches(VALIDATION_REGEX.EMAIL, {
+    message: VALIDATION_ERROR.EMAIL,
   })
   email: string;
 
-  @Matches(/^([0-9]{3})[-]([0-9]{4})[-][0-9]{4}$/, {
-    message: ValidationErrorMessage.PHONE_NUMBER,
+  @Matches(VALIDATION_REGEX.PHONE_NUMBER, {
+    message: VALIDATION_ERROR.PHONE_NUMBER,
   })
   phoneNumber: string;
 }

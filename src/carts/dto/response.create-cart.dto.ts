@@ -1,14 +1,8 @@
-import {
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsPositive,
-  IsString,
-} from 'class-validator';
-import { ORDER_STATUS } from 'src/utils/constants/order-status.enum';
+import { IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { Option } from 'src/items/option.entity';
 import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
 
-export class ResponseCreateOrderDto {
+export class ResponseCreateCartDto {
   @IsNumber({}, { message: VALIDATION_ERROR.NUMBER_TYPE })
   @IsPositive({ message: VALIDATION_ERROR.POSITIVE_NUMBER })
   totalPrice: number;
@@ -17,12 +11,6 @@ export class ResponseCreateOrderDto {
   @IsPositive({ message: VALIDATION_ERROR.POSITIVE_NUMBER })
   totalQuantity: number;
 
-  @IsString()
-  orderNumber: string;
-
-  @IsDate()
-  orderDate: Date;
-
-  @IsEnum(ORDER_STATUS)
-  orderStatus: ORDER_STATUS;
+  @IsNotEmpty({ message: VALIDATION_ERROR.OPTION_TYPE })
+  option: Option;
 }

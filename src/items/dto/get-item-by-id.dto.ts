@@ -1,8 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
 import { Item } from '../item.entity';
-import { ValidationErrorMessage } from 'src/utils/validation-error-message';
+import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
 
 export class GetItemByIdDto {
-  @IsNotEmpty({ message: ValidationErrorMessage.ITEM_TPYE })
+  @IsNotEmpty({ message: VALIDATION_ERROR.ITEM_TPYE })
   item: Item;
 }

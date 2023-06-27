@@ -22,7 +22,7 @@ export class OrdersController {
   @Post('/')
   @UsePipes(ValidationPipe)
   @HttpCode(201)
-  createOrder(
+  async createOrder(
     @Body() requestCreateOrderDto: RequestCreateOrderDto,
     @GetUser() user: User,
   ): Promise<ResponseCreateOrderDto> {

@@ -8,6 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/signup.dto';
 import { SignInDto } from './dtos/signin.dto';
+import { JwtToken } from './jwt-token';
 
 @Controller('auth')
 export class AuthController {
@@ -20,9 +21,7 @@ export class AuthController {
   }
 
   @Post('/signin')
-  async signIn(
-    @Body(ValidationPipe) signInDto: SignInDto,
-  ): Promise<{ accessToken: string }> {
+  async signIn(@Body(ValidationPipe) signInDto: SignInDto): Promise<JwtToken> {
     return this.authService.signIn(signInDto);
   }
 }

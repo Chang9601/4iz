@@ -4,6 +4,7 @@ import { SignUpDto } from './dtos/signup.dto';
 import * as bcrypt from 'bcryptjs';
 import { SignInDto } from './dtos/signin.dto';
 import { JwtService } from '@nestjs/jwt';
+import { JwtToken } from './jwt-token';
 
 @Injectable()
 export class AuthService {
@@ -16,9 +17,9 @@ export class AuthService {
     return this.userRepository.createUser(signUpDto);
   }
 
-  async signIn(signInDto: SignInDto): Promise<{ accessToken: string }> {
+  async signIn(signInDto: SignInDto): Promise<JwtToken> {
     const { email, password } = signInDto;
-    const user = await this.userRepository.findOneBy({ email });
+    const [user] = await this.userRepository.find({ where: { email: email } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload = { email };
@@ -26,7 +27,7 @@ export class AuthService {
 
       return { accessToken };
     } else {
-      throw new UnauthorizedException('login failed!');
+      throw new UnauthorizedException('Login failed');
     }
   }
 }

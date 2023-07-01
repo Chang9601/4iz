@@ -13,7 +13,8 @@ export class UserRepository extends Repository<User> {
   async createUser(signUpDto: SignUpDto): Promise<void> {
     const { name, email, password, phoneNumber, birthday } = signUpDto;
 
-    const salt = await bcrypt.genSalt();
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = this.create({
@@ -28,7 +29,7 @@ export class UserRepository extends Repository<User> {
       await this.save(user);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
-        throw new ConflictException('Existing email');
+        throw new ConflictException(`User with email ${email} already exists`);
       } else {
         throw new InternalServerErrorException();
       }

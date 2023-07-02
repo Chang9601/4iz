@@ -8,7 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/signup.dto';
 import { SignInDto } from './dtos/signin.dto';
-import { JwtToken } from './jwt-token';
+import { JwtToken } from './jwt-token.interface';
 
 @Controller('auth')
 export class AuthController {

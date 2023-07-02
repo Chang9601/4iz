@@ -4,7 +4,7 @@ import { SignUpDto } from './dtos/signup.dto';
 import * as bcrypt from 'bcryptjs';
 import { SignInDto } from './dtos/signin.dto';
 import { JwtService } from '@nestjs/jwt';
-import { JwtToken } from './jwt-token';
+import { JwtToken } from './jwt-token.interface';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +27,7 @@ export class AuthService {
 
       return { accessToken };
     } else {
-      throw new UnauthorizedException('Login failed');
+      throw new UnauthorizedException('Invalid credentials');
     }
   }
 }

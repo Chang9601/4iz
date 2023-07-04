@@ -7,13 +7,13 @@ import { User } from 'src/auth/user.entity';
 import { GetCartsDto } from './dto/get-carts.dto';
 import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
 import { ResponseUpdateCartDto } from './dto/response.update-cart.dto';
-import { ItemRepository } from 'src/items/item.repository';
+import { ItemsRepository } from 'src/items/items.repository';
 
 @Injectable()
 export class CartsService {
   constructor(
     private readonly cartRepository: CartRepository,
-    private readonly itemRepository: ItemRepository,
+    private readonly itemsRepository: ItemsRepository,
   ) {}
 
   private async getCartById(id: number, user: User): Promise<Cart> {
@@ -35,7 +35,7 @@ export class CartsService {
     requestCreateCartDto: RequestCreateCartDto,
     user: User,
   ): Promise<ResponseCreateCartDto[]> {
-    const [item] = await this.itemRepository.find({
+    const [item] = await this.itemsRepository.find({
       where: { id: requestCreateCartDto.itemId },
     });
 

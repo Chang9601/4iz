@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ItemsController } from './items.controller';
 import { ItemsService } from './items.service';
-import { TypeOrmExModule } from 'src/repository/typeorm-ex.module';
-import { ItemRepository } from './item.repository';
+import { TypeOrmExModule } from './../repository/typeorm-ex.module';
+import { ItemsRepository } from './items.repository';
 
 @Module({
-  imports: [TypeOrmExModule.forCustomRepository([ItemRepository])],
+  imports: [TypeOrmExModule.forCustomRepository([ItemsRepository])],
   controllers: [ItemsController],
   providers: [ItemsService],
-  exports: [TypeOrmExModule.forCustomRepository([ItemRepository])],
+  exports: [TypeOrmExModule.forCustomRepository([ItemsRepository])],
 })
 export class ItemsModule {}

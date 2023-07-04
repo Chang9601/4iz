@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { PAGINATION } from '../../utils/constants/pagination.enum';
-import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
+import { VALIDATION_ERROR } from '../../utils/constants/validation-error.enum';
 
 export class RequestGetItemsDto {
   @IsNumber()

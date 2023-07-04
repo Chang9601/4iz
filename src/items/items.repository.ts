@@ -1,13 +1,13 @@
 import { Item } from './item.entity';
 import { Repository } from 'typeorm';
-import { ClauseBuilder } from 'src/utils/clause-builder';
-import { CustomRepository } from 'src/repository/typeorm-ex.decorator';
+import { ClauseBuilder } from '../utils/clause-builder';
+import { CustomRepository } from '../repository/typeorm-ex.decorator';
 import { GetItemByIdDto } from './dto/get-item-by-id.dto';
 import { RequestGetItemsDto } from './dto/request.get-items.dto';
 import { ResponseGetItemsDto } from './dto/response.get-items.dto';
 
 @CustomRepository(Item)
-export class ItemRepository extends Repository<Item> {
+export class ItemsRepository extends Repository<Item> {
   async getItemById(id: number): Promise<GetItemByIdDto> {
     const item = await this.createQueryBuilder('item')
       .select([

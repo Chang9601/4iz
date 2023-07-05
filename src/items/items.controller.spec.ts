@@ -5,7 +5,8 @@ import { RequestGetItemsDto } from './dto/request.get-items.dto';
 import { Item } from './item.entity';
 import { NotFoundException } from '@nestjs/common';
 
-const item1 = {
+const mockItem1 = {
+  id: 1,
   name: '나이키 플렉스 슈즈',
   gender: '남성',
   price: 259000.0,
@@ -14,7 +15,8 @@ const item1 = {
   releaseDate: new Date('2012-04-13'),
 };
 
-const item2 = {
+const mockItem2 = {
+  id: 2,
   name: '나이키코트 슈즈 블로그',
   gender: '여성',
   price: 189000.0,
@@ -23,7 +25,8 @@ const item2 = {
   releaseDate: new Date('2023-03-05'),
 };
 
-const item3 = {
+const mockItem3 = {
+  id: 3,
   name: '스테판 슈즈 엑스',
   gender: '여성',
   price: 259000.0,
@@ -32,7 +35,7 @@ const item3 = {
   releaseDate: new Date('2018-01-24'),
 };
 
-const items = [item1, item2, item3];
+const mockItems = [mockItem1, mockItem2, mockItem3];
 
 describe('ItemsController', () => {
   let controller: ItemsController;
@@ -41,20 +44,21 @@ describe('ItemsController', () => {
   beforeEach(async () => {
     mockItemsService = {
       getItemById: async (id: number) => {
-        if (id >= items.length) {
+        const mockItem = mockItems.find(
+          (mockItem) => mockItem.id === id,
+        ) as Item;
+
+        if (!mockItem) {
           throw new NotFoundException(`Item with id ${id} not found`);
         }
 
         return {
-          item: {
-            id,
-            ...item2,
-          } as Item,
+          item: mockItem,
         };
       },
       getItems: async (conditions: RequestGetItemsDto) => {
-        const result = items.filter((item) => {
-          return item.name.indexOf(conditions.search) !== -1;
+        const result = mockItems.filter((mockItem) => {
+          return mockItem.name.indexOf(conditions.search) !== -1;
         }) as Item[];
 
         return {
@@ -83,20 +87,21 @@ describe('ItemsController', () => {
   });
 
   it('should get a single item', async () => {
-    const id = 2;
+    const id = Math.floor(Math.random() * mockItems.length) + 1;
     const dto = await controller.getItemById(id);
     const item = dto.item;
 
     expect(item).toHaveProperty('id');
-    expect(item.gender).toBe('여성');
-    expect(item.discountRate).toBe(65);
+    expect(item?.gender).toBe(mockItems[id - 1].gender);
+    expect(item?.discountRate).toBe(mockItems[id - 1].discountRate);
   });
 
   it('should throw a NotFoundException', async () => {
-    const id = 100;
-    await expect(controller.getItemById(id)).rejects.toThrowError(
-      NotFoundException,
-    );
+    await expect(
+      controller.getItemById(
+        Math.floor(Math.random() * mockItems.length) + mockItems.length + 1,
+      ),
+    ).rejects.toThrowError(NotFoundException);
   });
 
   it('should get an array of items', async () => {

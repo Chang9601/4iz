@@ -1,8 +1,9 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsObject, IsOptional } from 'class-validator';
 import { Item } from '../item.entity';
 import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
 
 export class GetItemByIdDto {
-  @IsNotEmpty({ message: VALIDATION_ERROR.ITEM_TPYE })
-  item: Item;
+  @IsOptional({ message: VALIDATION_ERROR.OBJECT_TYPE })
+  @IsObject()
+  item?: Item;
 }

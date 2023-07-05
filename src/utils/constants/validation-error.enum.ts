@@ -1,4 +1,5 @@
 export enum VALIDATION_ERROR {
+  OBJECT_TYPE = 'Must be object',
   NUMBER_TYPE = 'Must be number',
   STRING_TYPE = 'Must be string',
   STRING_LENGTH = 'Too short, minimum length is 1 character',

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmExModule } from 'src/repository/typeorm-ex.module';
-import { UserRepository } from './user.repository';
+import { UsersRepository } from './users.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
@@ -16,7 +16,7 @@ import { JwtStrategy } from './jwt.strategy';
         signOptions: { expiresIn: 60 * 60 },
       }),
     }),
-    TypeOrmExModule.forCustomRepository([UserRepository]),
+    TypeOrmExModule.forCustomRepository([UsersRepository]),
   ],
   controllers: [AuthController],
   // Register JwtStrategy in Auth module

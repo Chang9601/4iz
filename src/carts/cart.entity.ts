@@ -8,8 +8,8 @@ import {
   JoinColumn,
   //Index,
 } from 'typeorm';
-import { User } from 'src/auth/user.entity';
-import { Option } from 'src/items/option.entity';
+import { User } from '../auth/user.entity';
+import { Option } from '../items/option.entity';
 
 @Entity('carts')
 //@Index(['user', 'options.id'], { unique: true })

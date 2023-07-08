@@ -10,7 +10,7 @@ import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
 import { NotFoundException } from '@nestjs/common';
 
 @CustomRepository(Cart)
-export class CartRepository extends Repository<Cart> {
+export class CartsRepository extends Repository<Cart> {
   async createCart(
     requestCreateCartDto: RequestCreateCartDto,
     user: User,

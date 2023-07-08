@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CartRepository } from './cart.repository';
+import { CartsRepository } from './carts.repository';
 import { RequestCreateCartDto } from './dto/request.create-cart.dto';
 import { Cart } from './cart.entity';
 import { RequestUpdateCartDto } from './dto/request.update-cart.dto';
@@ -12,7 +12,7 @@ import { ItemsRepository } from 'src/items/items.repository';
 @Injectable()
 export class CartsService {
   constructor(
-    private readonly cartRepository: CartRepository,
+    private readonly cartRepository: CartsRepository,
     private readonly itemsRepository: ItemsRepository,
   ) {}
 

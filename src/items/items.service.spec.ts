@@ -45,7 +45,7 @@ describe('ItemsService', () => {
     mockItemsRepository = {
       getItemById: async (id: number) => {
         return {
-          item: mockItems[id - 1] as Item,
+          item: mockItems.find((mockItem) => mockItem.id === id) as Item,
         };
       },
       getItems: async (conditions: RequestGetItemsDto) => {
@@ -82,10 +82,11 @@ describe('ItemsService', () => {
     const id = Math.floor(Math.random() * mockItems.length) + 1;
     const dto = await service.getItemById(id);
     const item = dto.item;
+    const index = mockItems.findIndex((mockItem) => mockItem.id === id);
 
     expect(item).toHaveProperty('id');
-    expect(item?.gender).toBe(mockItems[id - 1].gender);
-    expect(item?.discountRate).toBe(mockItems[id - 1].discountRate);
+    expect(item?.gender).toBe(mockItems[index].gender);
+    expect(item?.discountRate).toBe(mockItems[index].discountRate);
   });
 
   it('should get an array of items', async () => {

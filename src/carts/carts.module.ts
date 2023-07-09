@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CartsController } from './carts.controller';
 import { CartsService } from './carts.service';
-import { TypeOrmExModule } from 'src/repository/typeorm-ex.module';
+import { TypeOrmExModule } from '../repository/typeorm-ex.module';
 import { CartsRepository } from './carts.repository';
-import { AuthModule } from 'src/auth/auth.module';
-import { ItemsModule } from 'src/items/items.module';
+import { AuthModule } from '../auth/auth.module';
+import { ItemsModule } from '../items/items.module';
 
 @Module({
   // Import AuthModule to use it in CartsModule

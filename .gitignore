@@ -38,8 +38,9 @@ lerna-debug.log*
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,webstorm,visualstudiocode,vim,macos,linux,zsh,node
 
 .idea
-.env
+.env.development
 .env.test
+.env.production
 db/schema.sql
 
 

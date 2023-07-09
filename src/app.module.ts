@@ -14,20 +14,25 @@ import { OrdersModule } from './orders/orders.module';
     CartsModule,
     AuthModule,
     OrdersModule,
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: +configService.get('DB_PORT'),
-        database: configService.get('DB_DATABASE'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        entities: ['dist/**/*.entity.{js,ts}'],
-        synchronize: true,
-      }),
+      useFactory: async (configService: ConfigService) => {
+        return {
+          type: 'mysql',
+          host: configService.get<string>('DB_HOST'),
+          port: +configService.get('DB_PORT'),
+          database: configService.get<string>('DB_DATABASE'),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          entities: [__dirname + '/**/*.entity.{ts,js}'],
+          synchronize: true,
+        };
+      },
     }),
   ],
   controllers: [AppController],

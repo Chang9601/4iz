@@ -3,11 +3,11 @@ import { CartsRepository } from './carts.repository';
 import { RequestCreateCartDto } from './dto/request.create-cart.dto';
 import { Cart } from './cart.entity';
 import { RequestUpdateCartDto } from './dto/request.update-cart.dto';
-import { User } from 'src/auth/user.entity';
+import { User } from '../auth/user.entity';
 import { GetCartsDto } from './dto/get-carts.dto';
 import { ResponseCreateCartDto } from './dto/response.create-cart.dto';
 import { ResponseUpdateCartDto } from './dto/response.update-cart.dto';
-import { ItemsRepository } from 'src/items/items.repository';
+import { ItemsRepository } from '../items/items.repository';
 
 @Injectable()
 export class CartsService {

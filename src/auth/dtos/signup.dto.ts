@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDate, Matches } from 'class-validator';
-import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
-import { VALIDATION_REGEX } from 'src/utils/constants/validation-regex.enum';
+import { VALIDATION_ERROR } from '../../utils/constants/validation-error.enum';
+import { VALIDATION_REGEX } from '../../utils/constants/validation-regex.enum';
 
 export class SignUpDto {
   @Matches(VALIDATION_REGEX.NAME, {

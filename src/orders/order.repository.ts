@@ -1,19 +1,19 @@
-import { CustomRepository } from 'src/repository/typeorm-ex.decorator';
+import { CustomRepository } from '../repository/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { Order } from './order.entity';
 import { RequestCreateOrderDto } from './dto/request.create-order.dto';
-import { User } from 'src/auth/user.entity';
+import { User } from '../auth/user.entity';
 import { ResponseCreateOrderDto } from './dto/response.create-order.dto';
-import { Cart } from 'src/carts/cart.entity';
+import { Cart } from '../carts/cart.entity';
 import { Payment } from './payment.entity';
 import { Shipment } from './shipment.entity';
-import { generateNumber } from 'src/utils/number-generator';
+import { generateNumber } from '../utils/number-generator';
 import { OrderStatus } from './order-status.entity';
-import { Option } from 'src/items/option.entity';
-import { PAYMENT_METHOD } from 'src/utils/constants/payment-method.enum';
-import { ORDER_STATUS } from 'src/utils/constants/order-status.enum';
+import { Option } from '../items/option.entity';
+import { PAYMENT_METHOD } from '../utils/constants/payment-method.enum';
+import { ORDER_STATUS } from '../utils/constants/order-status.enum';
 import { NotFoundException } from '@nestjs/common';
-import { RANDOM_NUMBER } from 'src/utils/constants/random-number.enum';
+import { RANDOM_NUMBER } from '../utils/constants/random-number.enum';
 
 @CustomRepository(Order)
 export class OrderRepository extends Repository<Order> {

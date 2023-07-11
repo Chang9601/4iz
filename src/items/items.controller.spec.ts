@@ -96,7 +96,7 @@ describe('ItemsController', () => {
     expect(item?.discountRate).toBe(mockItems[id - 1].discountRate);
   });
 
-  it('should throw a NotFoundException', async () => {
+  it('should throw a NotFoundException for an invalid item', async () => {
     await expect(
       controller.getItemById(
         Math.floor(Math.random() * mockItems.length) + mockItems.length + 1,

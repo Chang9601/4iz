@@ -22,6 +22,7 @@ export class AuthController {
   }
 
   @Post('/signin')
+  @HttpCode(200)
   async signIn(@Body(ValidationPipe) signInDto: SignInDto): Promise<JwtToken> {
     return this.authService.signIn(signInDto);
   }

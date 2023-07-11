@@ -226,7 +226,7 @@ describe('CartsController', () => {
     });
   });
 
-  it('should throw a NotFoundException', async () => {
+  it('should throw a NotFoundException for an invalid item', async () => {
     const requestCreateCartDto: RequestCreateCartDto = {
       itemId: 100,
       options: ['검정색/230/2', '노란색/290/4'],
@@ -274,7 +274,7 @@ describe('CartsController', () => {
     expect(updateCartDto.totalQuantity).toBe(requestUpdateCartDto.quantity);
   });
 
-  it('should throw a NotFoundException', async () => {
+  it('should throw a NotFoundException for updating an invalid cart', async () => {
     await controller.createCart(requestCreateCartDto, mockUser as User);
     const dto = await controller.getCarts(limit, offset, mockUser as User);
     const carts = dto.carts;
@@ -307,7 +307,7 @@ describe('CartsController', () => {
     expect(lengthBeforeDelete).not.toBe(lengthAfterDelete);
   });
 
-  it('should throw a NotFoundException', async () => {
+  it('should throw a NotFoundException for deleting an invalid cart', async () => {
     await controller.createCart(requestCreateCartDto, mockUser as User);
     const dto = await controller.getCarts(limit, offset, mockUser as User);
     const carts = dto.carts;

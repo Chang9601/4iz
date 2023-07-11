@@ -79,7 +79,7 @@ describe('AuthService', () => {
     expect(user.email).toBe('chang1234@gmail.com');
   });
 
-  it('should throw a ConflictException', async () => {
+  it('should throw a ConflictException for a duplicate email', async () => {
     await service.signUp(signUpDto);
     await expect(service.signUp(signUpDto)).rejects.toThrowError(
       ConflictException,

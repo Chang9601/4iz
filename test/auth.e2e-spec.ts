@@ -22,7 +22,7 @@ describe('Auth System (e2e)', () => {
       password: '1234Aa!@',
     };
 
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/auth/signin')
       .send(signInDto)
       .expect(400);
@@ -34,7 +34,7 @@ describe('Auth System (e2e)', () => {
       password: '1234Aa!@%$',
     };
 
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/auth/signin')
       .send(signInDto)
       .expect(400);
@@ -46,15 +46,14 @@ describe('Auth System (e2e)', () => {
       password: '1234Aa!@',
     };
 
-    return request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/auth/signin')
       .send(signInDto)
-      .expect(200)
-      .then((res) => {
-        const body = res.body;
-        const accessToken = body.accessToken;
+      .expect(200);
 
-        expect(accessToken).toBeDefined();
-      });
+    const body = res.body;
+    const accessToken = body.accessToken;
+
+    expect(accessToken).toBeDefined();
   });
 });

@@ -40,7 +40,8 @@ describe('Cart System (e2e)', () => {
     const cartRes = await request(app.getHttpServer())
       .post('/carts')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send(requestCreateCartDto);
+      .send(requestCreateCartDto)
+      .expect(201);
 
     const cartBody = cartRes.body;
 
@@ -66,7 +67,8 @@ describe('Cart System (e2e)', () => {
 
     const cartRes = await request(app.getHttpServer())
       .get('/carts')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
 
     const cartBody = cartRes.body;
 
@@ -96,7 +98,8 @@ describe('Cart System (e2e)', () => {
 
     const getCartsRes = await request(app.getHttpServer())
       .get('/carts')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
 
     const getCartBody = getCartsRes.body;
     const carts = getCartBody.carts;
@@ -108,7 +111,8 @@ describe('Cart System (e2e)', () => {
     const updateCartRes = await request(app.getHttpServer())
       .patch(uri)
       .set('Authorization', `Bearer ${accessToken}`)
-      .send(requestUpdateRequestCart);
+      .send(requestUpdateRequestCart)
+      .expect(200);
 
     const updateCartBody = updateCartRes.body;
 
@@ -138,7 +142,8 @@ describe('Cart System (e2e)', () => {
 
     const getCartsRes = await request(app.getHttpServer())
       .get('/carts')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
 
     const getCartBody = getCartsRes.body;
     const carts = getCartBody.carts;
@@ -170,7 +175,8 @@ describe('Cart System (e2e)', () => {
 
     const getCartsRes = await request(app.getHttpServer())
       .get('/carts')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
 
     const getCartBody = getCartsRes.body;
     const carts = getCartBody.carts;
@@ -201,7 +207,8 @@ describe('Cart System (e2e)', () => {
 
     const getCartsRes = await request(app.getHttpServer())
       .get('/carts')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
 
     const getCartBody = getCartsRes.body;
     const carts = getCartBody.carts;

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
-import { Option } from 'src/items/option.entity';
-import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
+import { Option } from '../../items/option.entity';
+import { VALIDATION_ERROR } from '../../utils/constants/validation-error.enum';
 
 export class ResponseCreateCartDto {
   @IsNumber({}, { message: VALIDATION_ERROR.NUMBER_TYPE })

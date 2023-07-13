@@ -5,8 +5,8 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { ORDER_STATUS } from 'src/utils/constants/order-status.enum';
-import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
+import { ORDER_STATUS } from '../../utils/constants/order-status.enum';
+import { VALIDATION_ERROR } from '../../utils/constants/validation-error.enum';
 
 export class ResponseCreateOrderDto {
   @IsNumber({}, { message: VALIDATION_ERROR.NUMBER_TYPE })

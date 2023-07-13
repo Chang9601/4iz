@@ -222,4 +222,6 @@ describe('Cart System (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(404);
   });
+
+  afterEach(() => app.close());
 });

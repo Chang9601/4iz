@@ -56,4 +56,6 @@ describe('Auth System (e2e)', () => {
 
     expect(accessToken).toBeDefined();
   });
+
+  afterEach(() => app.close());
 });

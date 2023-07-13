@@ -19,7 +19,13 @@
     "test:cov": "cross-env NODE_ENV=test jest --coverage",
     "test:debug": "cross-env NODE_ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --maxWorkers=1",
-    "test:e2e:watch": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --watch --maxWorkers=1"
+    "test:e2e:watch": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --watch --maxWorkers=1",
+    "typeorm": "cross-env NODE_ENV=development typeorm-ts-node-esm",
+    "migration:generate": "npm run typeorm migration:generate -- -d ./ormconfig.ts",
+    "migration:create": "npm run typeorm migration:create",
+    "migration:show": "npm run typeorm migration:show",
+    "migration:run": "npm run typeorm migration:run -- -d ./ormconfig.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d ./ormconfig.ts"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -54,6 +60,7 @@
     "@types/uuid": "^9.0.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "dotenv": "^16.3.1",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",

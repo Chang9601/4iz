@@ -50,4 +50,6 @@ describe('Items System (e2e)', () => {
     expect(items[0].gender).toBe('여성');
     expect(items[2].name).toBe('나이키코트 울트라 슈즈');
   });
+
+  afterEach(() => app.close());
 });

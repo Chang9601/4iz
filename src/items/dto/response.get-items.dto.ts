@@ -1,6 +1,6 @@
 import { IsArray, IsNumber, IsPositive, Min } from 'class-validator';
 import { Item } from '../item.entity';
-import { VALIDATION_ERROR } from 'src/utils/constants/validation-error.enum';
+import { VALIDATION_ERROR } from '../../utils/constants/validation-error.enum';
 
 export class ResponseGetItemsDto {
   @IsNumber({}, { message: VALIDATION_ERROR.NUMBER_TYPE })

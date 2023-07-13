@@ -55,4 +55,6 @@ describe('Order System (e2e)', () => {
     expect(orderBody).toHaveProperty('orderNumber');
     expect(orderBody).toHaveProperty('orderStatus');
   });
+
+  afterEach(() => app.close());
 });

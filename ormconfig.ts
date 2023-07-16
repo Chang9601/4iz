@@ -3,24 +3,19 @@ import { DataSource } from 'typeorm';
 
 dotenv.config();
 
-let database: string;
 let migrationsRun: boolean;
 
 switch (process.env.NODE_ENV) {
   case 'development':
-    database = '4iz_refactoring_dev';
     migrationsRun = false;
     break;
   case 'test':
-    database = '4iz_refactoring_test';
     migrationsRun = true;
     break;
   case 'production':
-    database = '4iz_refactoring_prod';
     migrationsRun = true;
     break;
   default:
-    database = '';
     migrationsRun = false;
 }
 
@@ -30,7 +25,7 @@ export const dataSource = new DataSource({
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: database,
+  database: process.env.DB_DATABASE,
   entities:
     process.env.NODE_ENV === 'development' || 'production'
       ? [__dirname + '/../**/*.entity.js']

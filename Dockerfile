@@ -1,9 +1,11 @@
+# 1. 배포 환경 기반
+# 배포 환경 의존성 설치
 # 항상 slim 사용! 추가 패키지가 필요한 경우 apt를 사용하여 추가
-# Alpine은 Node.js에서 공식적으로 지원되지 않으므로 기본 debian을 사용
-FROM node:16.15.0-slim AS prod
+# Alpine은 Node.js에서 공식적으로 지원되지 않으므로 기본  Debian을 사용
+FROM node:16.15.0-slim as base
 
-# 환경 설정에 따라 개발 또는 배포
-# Docker Compose를 사용하여 빌드 및 실행하는 과정에서 이 값을 개발 환경으로 재정의
+# 환경에 따라 개발, 테스트, 배포
+# Docker Compose를 사용하여 빌드 및 실행을 위해 개발, 테스트 환경 설정
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
 
@@ -22,18 +24,66 @@ RUN npm i npm@8.5.5 -g
 # npm이 애플리케이션을 실행하는 동일한 사용자로 의존성을 설치
 USER node
 
-# 로컬 개발을 시 애플리케이션 바인드 마운트를 쉽게하기 위해 의존성을 먼저 다른 위치에 설치
+# 개발 시 애플리케이션 바인드 마운트를 쉽게하기 위해 의존성을 먼저 다른 위치에 설치
 # USER를 먼저 설정하면 WORKDIR이 올바른 권한을 설정
 WORKDIR /opt/node_app
 
 COPY --chown=node:node package*.json ./
-# npm install 보다 npm ci 사용
+
+# npm install 보다 npm ci 사용(배포 의존성만 설치)
 RUN npm ci && npm cache clean --force
+
 ENV PATH /opt/node_app/node_modules/.bin:$PATH
 
-# 소스 코드는 가장 자주 변경되므로 마지막에 복사
-# node로 복사해야 권한이 필요한대로 일치
+
+# 2. 개발 환경
+# 개발 시 애플리케이션 바인드 마운트 할 것이기 때문에 COPY 생략
+# 개발 환경에서 Docker Compose를 사용하여 개발할 때 시간을 절약
+FROM base as dev
+
+ENV NODE_ENV=development
+
+USER node
+
+WORKDIR /opt/node_app
+
+# 개발 의존성 포함
+RUN npm install
+
 WORKDIR /opt/node_app/app
+
+CMD ["npm", "run", "start:dev"]
+
+
+# 3. 소스 (소스 코드 복사)
+# 소스 코드를 다음 두 단계에서 사용하기 위해 빌더로 가져오는 것
+# 두 번 복사하지 않도록 자체 단계로 구성
+FROM base as source
+
+USER node
+
+WORKDIR /opt/node_app/app
+
+# 소스 코드 복사
 COPY --chown=node:node . .
 
-CMD ["node", "dist/main.js"]
+
+# 4. 테스트 환경
+# CI에서 사용
+FROM source as test
+
+ENV NODE_ENV=development
+
+USER node
+
+# 배포 및 개발 의존성 복사
+COPY --from=dev /opt/node_app/node_modules /opt/node_app/node_modules
+
+# 단위 테스트 (TO-DO: E2E 테스트)
+CMD ["npm", "run", "test"] 
+
+
+# 배포 환경(기본)
+FROM source as prod
+
+CMD ["node", "dist/main"]

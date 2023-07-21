@@ -25,7 +25,7 @@ import { ResponseUpdateCartDto } from './dto/response.update-cart.dto';
 import { PAGINATION } from '../utils/constants/pagination.enum';
 
 @Controller('carts')
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard('jwt'))
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 

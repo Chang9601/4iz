@@ -1,0 +1,68 @@
+services:
+  app:
+    container_name: 4iz-app
+    image: 4iz
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: test
+    # E2E 테스트
+    command: sh -c '/wait && npm run test:e2e'
+    ports:
+      - '3000:3000'
+    # GitHub Actions 실행 시 권한 문제 때문에 바인드 마운트 사용 X
+    environment:
+      - NODE_ENV=test
+      - DB_TYPE=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=4iz
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_LOGGING=true
+      - JWT_SECRET_KEY=4iz-secret-key
+      - WAIT_HOSTS=db:3306
+      - WAIT_TIMEOUT=600
+      - WAIT_SLEEP_INTERVAL=10
+      - WAIT_HOST_CONNECT_TIMEOUT=10
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+
+  db:
+    container_name: 4iz-db
+    image: mysql:8.0.33-debian
+    cap_add:
+      - SYS_NICE
+    ports:
+      - '3307:3306'
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=4iz
+    volumes:
+      - ./database-dump:/docker-entrypoint-initdb.d
+      - db:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p$$MYSQL_ROOT_PASSWORD',
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+      start_period: 10m
+
+volumes:
+  db:

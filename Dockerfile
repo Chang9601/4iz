@@ -30,7 +30,7 @@ WORKDIR /opt/node_app
 
 COPY --chown=node:node package*.json ./
 
-# npm install 보다 npm ci 사용(배포 의존성만 설치)
+# CI, 배포, 테스트와 같은 자동화 환경의 경우 npm ci 사용(NODE_ENV=production -> 배포 의존성만 설치)
 RUN npm ci && npm cache clean --force
 
 ENV PATH /opt/node_app/node_modules/.bin:$PATH
@@ -47,7 +47,7 @@ USER node
 
 WORKDIR /opt/node_app
 
-# 개발 의존성 포함
+# 개발은 npm install 사용
 RUN npm install
 
 WORKDIR /opt/node_app/app
@@ -55,7 +55,7 @@ WORKDIR /opt/node_app/app
 CMD ["npm", "run", "start:dev"]
 
 
-# 3. 소스 (소스 코드 복사)
+# 3. 소스(소스 코드 복사)
 # 소스 코드를 다음 두 단계에서 사용하기 위해 빌더로 가져오는 것
 # 두 번 복사하지 않도록 자체 단계로 구성
 FROM base as source
@@ -76,10 +76,10 @@ ENV NODE_ENV=development
 
 USER node
 
-# 배포 및 개발 의존성 복사
+# 모든 의존성(배포 및 개발) 복사
 COPY --from=dev /opt/node_app/node_modules /opt/node_app/node_modules
 
-# 단위 테스트 (TO-DO: E2E 테스트)
+# 단위 테스트(TO-DO: E2E 테스트)
 CMD ["npm", "run", "test"] 
 
 

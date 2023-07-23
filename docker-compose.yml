@@ -6,7 +6,6 @@ services:
       dockerfile: Dockerfile
       context: .
       target: dev
-    restart: always
     # 개발 환경에서 사용되는 명령어
     command: sh -c '/wait && npm run start:dev'
     # 포트는 따옴표를 추가
@@ -25,15 +24,16 @@ services:
     environment:
       - NODE_ENV=development
       - DB_TYPE=mysql
-      - DB_HOST=db-test
+      # 개발 환경 시 db-dev, 테스트 환경 시 db-test
+      - DB_HOST=db-dev
       - DB_PORT=3306
       - DB_DATABASE=4iz
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_LOGGING=true
       - JWT_SECRET_KEY=4iz-secret-key
-      - WAIT_HOSTS=db-dev:3306
-      - WAIT_TIMEOUT=300
+      - WAIT_HOSTS=db-dev:3306, db-test:3306
+      - WAIT_TIMEOUT=600
       - WAIT_SLEEP_INTERVAL=10
       - WAIT_HOST_CONNECT_TIMEOUT=10
     depends_on:
@@ -43,7 +43,7 @@ services:
         condition: service_healthy
     healthcheck:
       disable: true
-
+  # 개발 환경 DB
   db-dev:
     container_name: 4iz-db-dev
     image: mysql:8.0.33-debian
@@ -77,8 +77,10 @@ services:
       interval: 5s
       timeout: 4s
       retries: 5
-      start_period: 4m30s
+      start_period: 10m
 
+  # 테스트 환경 DB(단위, E2E)
+  # docker compose exec app npm run test/test:e2e(주의: 컨테이너 이름이 아니라 서비스 이름)
   # extends 사용했으나 포트 문제 발생
   db-test:
     container_name: 4iz-db-test
@@ -111,7 +113,7 @@ services:
       interval: 5s
       timeout: 4s
       retries: 5
-      start_period: 4m30s
+      start_period: 10m
 
 volumes:
   db-dev:

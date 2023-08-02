@@ -86,4 +86,11 @@ CMD ["npm", "run", "test"]
 # 배포 환경(기본)
 FROM source as prod
 
-CMD ["node", "dist/main"]
+USER node
+
+WORKDIR /opt/node_app/app
+
+# 빌드
+RUN npm run build
+
+CMD ["node", "dist/src/main"]

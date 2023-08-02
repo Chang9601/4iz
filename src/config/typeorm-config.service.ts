@@ -47,7 +47,7 @@ export class TypeOrmConfigService {
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
       entities:
-        this.nodeEnv === ('development' || 'production')
+        this.nodeEnv === 'development' || this.nodeEnv === 'production'
           ? [__dirname + '/../**/*.entity.js']
           : [__dirname + '/../**/*.entity.ts'],
       migrations: [__dirname + '/../database/migrations/**/*{.ts,.js}'],

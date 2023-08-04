@@ -83,7 +83,7 @@ COPY --from=dev /opt/node_app/node_modules /opt/node_app/node_modules
 CMD ["npm", "run", "test"] 
 
 
-# 배포 환경(기본)
+# 5. 배포 환경(기본)
 FROM source as prod
 
 USER node

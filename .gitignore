@@ -42,8 +42,7 @@ lerna-debug.log*
 .env.test
 .env.production
 db/schema.sql
-
-
+*.rdb
 
 ### Linux ###
 *~

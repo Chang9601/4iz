@@ -1,0 +1,35 @@
+name: Test the application
+# 레포지토리에 모든 푸시 이벤트가 발생할 때마다 워크플로우가 실행된다.
+on: push
+
+# 테스트에 사용될 Docker 이미지를 지정한다.
+env:
+  DOCKER_IMAGE_TEST: csup96/4iz-test:latest
+
+jobs:
+  test:
+    # 테스트를 실행한다.
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      # 레포지토리의 내용을 가져온다.
+      - name: Check out the repository
+        uses: actions/checkout@v3
+      # QEMU를 설정한다(QEMU(Quick Emulator)는 에뮬레이션을 위해 사용된다.).
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      # Docker Buildx를 설정한다(Buildx는 Docker를 위한 CLI 플러그인으로, 다중 플랫폼 Docker 이미지를 빌드하는 데 추가 기능을 제공한다.).
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      # Docker 이미지를 빌드한다.
+      - name: Build a Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: . # 현재 디렉토리를 빌드 컨텍스트로 지정한다.
+          load: true # 빌드된 이미지를 Docker 데몬에 로드한다.
+          target: test # 빌드 대상을 "test"로 지정한다(다단계 빌드.).
+          tags: ${{ env.DOCKER_IMAGE_TEST }} # 정의한 환경 변수를 사용하여 Docker 이미지에 태그를 지정한다.
+
+      # 컨테이너를 실행할 Docker 이미지를 지정하고 docker container run 명령을 사용하여 Docker 컨테이너 내에서 단위 테스트를 실행하며 --rm은 컨테이너가 종료된 후에 컨테이너를 제거한다.
+      - name: Run unit tests with a Docker container
+        run: docker container run --rm ${{ env.DOCKER_IMAGE_TEST }}

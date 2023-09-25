@@ -1,0 +1,92 @@
+name: Deploy the application to production
+
+# main 브랜치 또는 dev 브랜치를 대상으로 하는 풀 리퀘스트가 발생할 때마다 워크플로우가 실행된다.
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+env:
+  DOCKER_IMAGE_TEST: csup96/4iz-test:latest
+  DOCKER_COMPOSE_SERVICE: app # E2E 테스트에 사용될 Docker Compose 서비스를 지정한다.
+
+jobs:
+  build-test-push:
+    # Docker 이미지를 빌드하고 테스트 한 후 Amazon ECR에 푸시한다.
+    name: Build and test a Docker image and push it to Amazon ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build a Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: test
+          tags: ${{ env.DOCKER_IMAGE_TEST }}
+
+      - name: Run unit tests with a Docker container
+        run: docker container run --rm ${{ env.DOCKER_IMAGE_TEST }}
+      # Docker Compose로 사용하여 E2E 테스트를 실행한다.
+      - name: Run E2E tests with a Docker Compose
+        run: |
+          docker compose -f docker-compose.ci.yml up --build --exit-code-from ${{ env.DOCKER_COMPOSE_SERVICE }}
+          exit_code=$?
+          echo "E2E Test Exit Code: $exit_code"
+          exit $exit_code
+
+      # 인증을 위한 AWS 자격 증명을 구성한다.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        # GitHub 레포지토리 -> Settings -> Secrets and variables -> Actions -> Secrets
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      # Amazon ECR에 로그인한다.
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      # AWS 자격 증명을 사용하여 Docker 이미지를 Amazon ECR에 빌드, 태그 및 푸시한다.
+      - name: Build, tag, and push the Docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }} # 현재 작업의 이전 단계(Login to Amazon ECR)에서 나온 값을 사용한다.
+          REPOSITORY: 4iz
+          IMAGE_TAG: latest
+        run: |
+          docker image build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker image push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    # 최신 Docker 이미지를 Amazon ECS에 배포한다.
+    name: Deploy the latest Docker image to Amazon ECS
+    runs-on: ubuntu-latest
+    # 이전 작업(build-test-push)이 완료될 때까지 기다린다.
+    needs: build-test-push
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      # AWS CLI(aws ecs update service)를 사용하여 ECS 서비스를 최신 Docker 이미지로 업데이트하고 새로운 배포를 실행한다.
+      - name: Update ECS service
+        # GitHub 레포지토리 -> Settings -> Secrets and variables -> Actions -> Variables
+        # --force-new-deployment는 서비스 정의가 변경되지 않았을 때도 새로운 배포를 강제로 수행한다.
+        run: |
+          aws ecs update-service \
+          --cluster ${{ vars.AWS_CLUSTER }} \
+          --service ${{ vars.AWS_SERVICE }} \
+          --task-definition ${{ vars.AWS_TASK_DEFINITION }} \
+          --force-new-deployment

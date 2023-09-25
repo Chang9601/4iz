@@ -6,36 +6,49 @@ services:
       dockerfile: Dockerfile
       context: .
       target: dev
-    # 개발 환경에서 사용되는 명령어
+    # 개발 환경에서 사용되는 명령으로 CMD를 재정의한다.
     command: sh -c '/wait && npm run start:dev'
-    # 포트는 따옴표를 추가
+    # 포트는 따옴표를 추가한다.
     ports:
       - '3000:3000'
     volumes:
-      # 개발 환경에서 소스코드 바인드 바운트
+      # 개발 환경에서 소스 코드 디렉터리를 바인드 마운트한다.
       - .:/opt/node_app/app
-      # 두 개의 파일을 바인드 마운트하면 빌드를 다시하지 않고도 개발 중에 패키지를 추가 가능
-      # 예를 들어, 개발 중에 앱에 bower를 추가하려면 컨테이너 내에서 설치한 후 nodemon이 다시 시작
-      # 변경 내용은 "docker compose down"을 실행할 때까지 유지되며 다음 빌드를 위해 호스트에 저장
-      # 부모 디렉토리에서 코드 바인드 마운트로 설치
-      # docker compose exec -w /opt/node_app node npm install --save bower
+      # 두 개의 파일을 바인드 마운트하면 빌드를 다시하지 않고도 개발 중에 패키지를 추가할 수 있다.
+      # 예를 들어, 개발 중에 애플리케이션에 cors 패키지를 추가하려면 컨테이너 내에서 설치한 후 nodemon이 다시 시작한다.
+      # 변경 내용은 "docker compose down"을 실행할 때까지 유지되며 다음 빌드를 위해 호스트에 저장된다.
+      # 부모 디렉토리에서 코드 바인드 마운트로 설치한다.
+      # docker compose exec -w /opt/node_app node npm install --save cors
       - ./package.json:/opt/node_app/package.json
       - ./package-lock.json:/opt/node_app/package-lock.json
     environment:
       - NODE_ENV=development
+      - HOST=localhost
+      - PORT=3000
       - DB_TYPE=mysql
-      # 개발 환경 시 db-dev, 테스트 환경 시 db-test
+      # 서비스 이름이 호스트 이름이다.
+      # 개발 환경 시 db-dev, 테스트 환경 시 db-test.
       - DB_HOST=db-dev
       - DB_PORT=3306
       - DB_DATABASE=4iz
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_LOGGING=true
-      - JWT_SECRET_KEY=4iz-secret-key
+      # 나머지 환경 변수.
+      - JWT_ACCESS_TOKEN_SECRET=4iz-jwt-access-token
+      - JWT_ACCESS_TOKEN_EXPIRATION=1800000
+      - JWT_REFRESH_TOKEN_SECRET=4iz-jwt-refresh-token
+      - JWT_REFRESH_TOKEN_EXPIRATION=86400000
+      - CACHE_TTL=120
+      - CACHE_MAX=1000
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
       - WAIT_HOSTS=db-dev:3306, db-test:3306
       - WAIT_TIMEOUT=600
       - WAIT_SLEEP_INTERVAL=10
       - WAIT_HOST_CONNECT_TIMEOUT=10
+    # 서비스 사이의 의존성을 명시한다.
+    # app 서비스를 시작하기 전에 db-dev 서비스와 db-test 서비스가 준비될 때까지 기다리지 않는다. 단지 시작되기까지만 기다린다.
     depends_on:
       db-dev:
         condition: service_healthy
@@ -43,7 +56,7 @@ services:
         condition: service_healthy
     healthcheck:
       disable: true
-  # 개발 환경 DB
+  # 개발 환경 DB.
   db-dev:
     container_name: 4iz-db-dev
     image: mysql:8.0.33-debian
@@ -56,11 +69,11 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      # 이미지 시작 시 생성할 데이터베이스의 이름을 지정한다.
       - MYSQL_DATABASE=4iz
     volumes:
-      # 데이터베이스와 데이터가 저장된 덤프 파일 바인드 마운트
+      # 데이터베이스와 데이터가 저장된 덤프 파일을 바인드 마운트한다.
       - ./database-dump:/docker-entrypoint-initdb.d
-      # 바인드 마운트를 미리 사용했기에 볼륨 사용
       - db-dev:/var/lib/mysql
     healthcheck:
       test:
@@ -79,9 +92,10 @@ services:
       retries: 5
       start_period: 10m
 
-  # 테스트 환경 DB(단위, E2E)
-  # docker compose exec app npm run test/test:e2e(주의: 컨테이너 이름이 아니라 서비스 이름)
-  # extends 사용했으나 포트 문제 발생
+  # 테스트 환경 DB(단위 테스트, E2E 테스트)
+  # 주의: 컨테이너 이름이 아니라 서비스 이름!
+  # 단위: docker compose exec app npm run test
+  # E2E: docker compose exec app npm run test:e2e
   db-test:
     container_name: 4iz-db-test
     image: mysql:8.0.33-debian
@@ -114,6 +128,22 @@ services:
       timeout: 4s
       retries: 5
       start_period: 10m
+
+  cache:
+    container_name: 4iz-cache
+    image: redis:7.2.4-alpine
+    ports:
+      - '6379:6379'
+
+  cache-commander:
+    container_name: 4iz-cache-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:cache:6379
+    ports:
+      - '8081:8081'
+    depends_on:
+      - cache
 
 volumes:
   db-dev:

@@ -6,13 +6,15 @@ services:
       dockerfile: Dockerfile
       context: .
       target: test
-    # E2E 테스트
+    # E2E 테스트 명령으로 CMD를 재정의한다.
     command: sh -c '/wait && npm run test:e2e'
     ports:
       - '3000:3000'
-    # GitHub Actions 실행 시 권한 문제 때문에 바인드 마운트 사용 X
+    # GitHub Actions 실행 시 권한 문제 때문에 바인드 마운트를 사용하지 않는다.
     environment:
       - NODE_ENV=test
+      - HOST=localhost
+      - PORT=3000
       - DB_TYPE=mysql
       - DB_HOST=db
       - DB_PORT=3306
@@ -20,7 +22,14 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_LOGGING=true
-      - JWT_SECRET_KEY=4iz-secret-key
+      - JWT_ACCESS_TOKEN_SECRET=4iz-jwt-access-token
+      - JWT_ACCESS_TOKEN_EXPIRATION=1800000
+      - JWT_REFRESH_TOKEN_SECRET=4iz-jwt-refresh-token
+      - JWT_REFRESH_TOKEN_EXPIRATION=86400000
+      - CACHE_TTL=120
+      - CACHE_MAX=1000
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
       - WAIT_HOSTS=db:3306
       - WAIT_TIMEOUT=600
       - WAIT_SLEEP_INTERVAL=10
@@ -63,6 +72,12 @@ services:
       timeout: 4s
       retries: 5
       start_period: 10m
+
+  cache:
+    container_name: 4iz-cache
+    image: redis:7.2.4-alpine
+    ports:
+      - '6379:6379'
 
 volumes:
   db:

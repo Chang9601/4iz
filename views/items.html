@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>상품 목록</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
+      }
+
+      header {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        width: 100%;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .item-container {
+        border: 1px solid #ccc;
+        margin: 10px;
+        padding: 10px;
+        text-align: center;
+      }
+
+      #status-message {
+        text-align: center;
+        color: red;
+        margin-top: 10px;
+      }
+
+      #item-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .pagination {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>상품 목록</h1>
+    </header>
+    <div class="container">
+      <label for="items-per-page">페이지 당 상품 개수: </label>
+      <input type="number" id="items-per-page" value="10" />
+      <button id="update-items-per-page">수정</button>
+
+      <ul id="item-list"></ul>
+      <div class="pagination">
+        <button id="previous-page">이전</button>
+        <button id="next-page">다음</button>
+      </div>
+      <p id="total-items"></p>
+
+      <p id="status-message"></p>
+
+      <div class="back-link">
+        <a href="#" onclick="goHome()">홈으로</a>
+      </div>
+    </div>
+
+    <script src="./common.js"></script>
+
+    <script>
+      const statusMessage = document.getElementById('status-message');
+
+      function goHome() {
+        window.location.href = 'index.html';
+      }
+
+      function isNumeric(input) {
+        return /^[1-9][0-9]*$/.test(input);
+      }
+
+      function getQueryParams() {
+        const queryParams = {};
+        const queryString = window.location.search.slice(1);
+        const paramPairs = queryString.split('&');
+
+        paramPairs.forEach((pair) => {
+          const [key, value] = pair.split('=');
+          queryParams[key] = decodeURIComponent(value);
+        });
+
+        return queryParams;
+      }
+
+      const queryParams = getQueryParams();
+
+      let currentPage = parseInt(queryParams.offset) || 1;
+      let itemsPerPage = parseInt(queryParams.limit) || 10;
+
+      async function fetchItems(offset, limit) {
+        try {
+          const response = await fetch(
+            `/items?offset=${offset}&limit=${limit}`,
+          );
+          const status = response.status;
+
+          if (status === 404) {
+            throw new Error(404);
+          } else if (status === 500) {
+            throw new Error(500);
+          }
+
+          const data = await response.json();
+
+          const items = data.items;
+          const state = data.pageState;
+
+          const itemList = document.getElementById('item-list');
+          itemList.innerHTML = '';
+
+          items.forEach((item) => {
+            const itemContainer = document.createElement('div');
+            itemContainer.classList.add('item-container');
+
+            const listItem = document.createElement('li');
+            listItem.textContent = item.name;
+            listItem.addEventListener('click', () => {
+              const url = `item.html?id=${encodeURIComponent(
+                item.id,
+              )}&offset=${encodeURIComponent(
+                offset,
+              )}&limit=${encodeURIComponent(limit)}`;
+
+              window.location.href = url;
+            });
+
+            itemContainer.appendChild(listItem);
+            itemList.appendChild(itemContainer);
+          });
+
+          const previousPageButton = document.getElementById('previous-page');
+          const nextPageButton = document.getElementById('next-page');
+          const totalItemsElement = document.getElementById('total-items');
+
+          previousPageButton.disabled = !state.isPreviousPageValid;
+          nextPageButton.disabled = !state.isNextPageValid;
+
+          currentPage = state.currentPage;
+          const total = state.total;
+
+          totalItemsElement.textContent = `상품 개수: ${total}개`;
+        } catch (error) {
+          const { message } = error;
+
+          if (message === '404') {
+            statusMessage.textContent = '존재하지 않는 페이지';
+          } else if (message === '500') {
+            statusMessage.textContent = '오류 발생';
+          } else {
+            statusMessage.textContent = '네트워크 오류 발생';
+          }
+        }
+      }
+
+      document
+        .getElementById('update-items-per-page')
+        .addEventListener('click', () => {
+          const newItemsPerPage = parseInt(
+            document.getElementById('items-per-page').value,
+            10,
+          );
+
+          if (isNumeric(newItemsPerPage)) {
+            itemsPerPage = newItemsPerPage;
+            currentPage = 1;
+            fetchItems(currentPage, itemsPerPage);
+          }
+        });
+
+      document.getElementById('previous-page').addEventListener('click', () => {
+        fetchItems(currentPage - 1, itemsPerPage);
+      });
+      document.getElementById('next-page').addEventListener('click', () => {
+        fetchItems(currentPage + 1, itemsPerPage);
+      });
+
+      fetchItems(currentPage, itemsPerPage);
+    </script>
+  </body>
+</html>

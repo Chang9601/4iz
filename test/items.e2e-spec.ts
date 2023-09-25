@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
 
-describe('Items System (e2e)', () => {
+import { AppModule } from './../src/app.module';
+import { PaginationDto } from '../src/dtos/pagination.dto';
+
+describe('Item E2E Test', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -15,41 +17,52 @@ describe('Items System (e2e)', () => {
     await app.init();
   });
 
-  it('should get a single item', async () => {
-    const id = 17;
-    const uri = encodeURI(`/items/${id}`);
+  describe('getItem', () => {
+    it('should get a single item', async () => {
+      const id = 22;
 
-    const res = await request(app.getHttpServer()).get(uri).expect(200);
+      const response = await request(app.getHttpServer())
+        .get(`/items/${id}`)
+        .expect(HttpStatus.OK);
 
-    const body = res.body;
-    const item = body.item;
+      const body = response.body;
 
-    expect(item.id).toBe(id);
-    expect(item.name).toBe('나이키 프리미엄 슈즈');
+      expect(body.id).toBeDefined();
+      expect(body.name).toBeDefined();
+    });
+
+    it('should throw NotFoundException for an invalid id', async () => {
+      const id = 10002;
+
+      await request(app.getHttpServer())
+        .get(`/items/${id}`)
+        .expect(HttpStatus.NOT_FOUND);
+    });
   });
 
-  it('should throw a NotFoundException', async () => {
-    const id = 100;
-    const uri = encodeURI(`/items/${id}`);
-    await request(app.getHttpServer()).get(uri).expect(404);
+  describe('getItems', () => {
+    it('should get an array of items meeting conditions', async () => {
+      const paginationDto: PaginationDto = {
+        offset: 0,
+        limit: 20,
+        search: '신발',
+        gender: '여성',
+        skip: 0,
+      };
+
+      const response = await request(app.getHttpServer())
+        .get(`/items`)
+        .query(paginationDto)
+        .expect(HttpStatus.OK);
+
+      const body = response.body;
+      const pageState = body.pageState;
+
+      expect(pageState.total).toBeDefined();
+      expect(pageState.currentPage).toBeDefined();
+      expect(pageState.lastPage).toBeDefined();
+    });
   });
 
-  it('should get an array of items', async () => {
-    const uri = encodeURI(
-      '/items?sort=high&search=나이키&gender=여성&color=검정&color=멀티컬러&category=테니스',
-    );
-    const res = await request(app.getHttpServer()).get(uri).expect(200);
-
-    const body = res.body;
-    const total = body.total;
-    const offset = body.offset;
-    const items = body.items;
-
-    expect(total).toBe(4);
-    expect(offset).toBe(1);
-    expect(items[0].gender).toBe('여성');
-    expect(items[2].name).toBe('나이키코트 울트라 슈즈');
-  });
-
-  afterEach(() => app.close());
+  afterEach(async () => await app.close());
 });

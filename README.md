@@ -2,20 +2,19 @@
 
 ## 소개
 
-- 위코드 1차 프로젝트 4iz를 TypeScript, Nest.js, Jest, Docker, AWS, GitHub Actions, NGINX를 사용하여 리팩토링한 프로젝트
+- 위코드 1차 프로젝트 4iz를 TypeScript, NestJS, Jest, Docker, AWS, GitHub Action를 사용하여 리팩토링한 프로젝트
 
 ## 기술 스택
 
 - 개발
   - 언어: TypeScript
-  - 프레임워크: Nest.js
+  - 프레임워크: NestJS
   - 데이터베이스: MySQL(TypeORM)
   - 테스트: Jest(Unit, E2E)
 - 인프라
   - 컨테이너 가상화: Docker
   - 클라우드: AWS(EC2, RDS, VPC(Private & Public Subnet, Private & Public Route Table, IGW, NACL))
   - CI: GitHub Actions
-  - 로드 밸런싱: NGINX(HTTPS)
 - 툴
   - GitHub
   - Postman

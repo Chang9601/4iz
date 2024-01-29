@@ -14,6 +14,8 @@ https://chang-app.com
 
 ## 실행
 main 브랜치의 docker-compose.yml 파일을 docker compose up --build 명령으로 실행.
+- 애플리케이션: http://localhost:3000
+- Redis 웹 인터페이스: http://localhost:8081
 
 ## 기술 스택
 |개발|

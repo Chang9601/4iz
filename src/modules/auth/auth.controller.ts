@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -26,6 +27,7 @@ import { Response } from 'express';
 import { CreateUserDto } from '../../dtos/create-user.dto';
 import { UserDto } from '../../dtos/user.dto';
 import { SignInDto } from '../../dtos/signin.dto';
+import { OAuthAuthorizationCodeDto } from '../../dtos/oauth-authorization-code.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -39,6 +41,7 @@ import { createCookieOptions } from '../../common/factories/common.factory';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  // DI는 IoC 컨테이너가 객체의 생명주기를 관리하는 방식이다.
   constructor(
     private readonly authService: AuthService,
     private readonly usersSerivce: UsersService,
@@ -175,5 +178,71 @@ export class AuthController {
     const { user } = request;
 
     return user;
+  }
+
+  @Get('/google')
+  async signInWithGoogle(
+    @Res({ passthrough: true }) response: Response,
+    @Query() oAuthAuthorizationCodeDto: OAuthAuthorizationCodeDto,
+  ) {
+    const user = await this.authService.findOrCreateGoogle(
+      oAuthAuthorizationCodeDto,
+    );
+
+    const { token: accessToken } = await this.authService.createToken(
+      user.id,
+      Token.ACCESS_TOKEN,
+    );
+    const { token: refreshToken } = await this.authService.createToken(
+      user.id,
+      Token.REFRESH_TOKEN,
+    );
+
+    await this.usersSerivce.setRefreshToken(refreshToken, user.id);
+
+    const accessTokenOptions = createCookieOptions(
+      this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION') as string,
+    );
+    const refreshTokenOptions = createCookieOptions(
+      this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION') as string,
+    );
+
+    response
+      .cookie(`access_token`, accessToken, accessTokenOptions)
+      .cookie(`refresh_token`, refreshToken, refreshTokenOptions)
+      .redirect('/');
+  }
+
+  @Get('/naver')
+  async signInWithNaver(
+    @Res({ passthrough: true }) response: Response,
+    @Query() oAuthAuthorizationCodeDto: OAuthAuthorizationCodeDto,
+  ) {
+    const user = await this.authService.findOrCreateNaver(
+      oAuthAuthorizationCodeDto,
+    );
+
+    const { token: accessToken } = await this.authService.createToken(
+      user.id,
+      Token.ACCESS_TOKEN,
+    );
+    const { token: refreshToken } = await this.authService.createToken(
+      user.id,
+      Token.REFRESH_TOKEN,
+    );
+
+    await this.usersSerivce.setRefreshToken(refreshToken, user.id);
+
+    const accessTokenOptions = createCookieOptions(
+      this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION') as string,
+    );
+    const refreshTokenOptions = createCookieOptions(
+      this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION') as string,
+    );
+
+    response
+      .cookie(`access_token`, accessToken, accessTokenOptions)
+      .cookie(`refresh_token`, refreshToken, refreshTokenOptions)
+      .redirect('/');
   }
 }

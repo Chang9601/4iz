@@ -54,9 +54,9 @@ describe('Admin E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
 
       response = await request(app.getHttpServer())
         .get('/admin/users')
@@ -82,14 +82,17 @@ describe('Admin E2E Test', () => {
         .send(createUserDto)
         .expect(HttpStatus.CREATED);
 
-      let response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/auth/signin')
         .send(credentials)
         .expect(HttpStatus.OK);
 
-      const cookies = response.headers['set-cookie'];
+      const headers = response.headers;
+      const cookies = headers['set-cookie'];
 
-      response = await request(app.getHttpServer())
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
         .get('/admin/users')
         .set('Cookie', cookies)
         .query(paginationDto)

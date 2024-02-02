@@ -42,27 +42,17 @@ export class OrdersService {
     return await this.ordersRepository.createOne(createOrderDto, user);
   }
 
-  async findOne(id: number) {
-    try {
-      const order = this.ordersRepository.findOne({
-        where: { id },
-        relations: ['orderStatus', 'orderToOptions', 'options'],
-      });
+  async findOne(id: number, user: User) {
+    const order = await this.ordersRepository.findOne({
+      where: { id, user: { id: user.id } },
+      relations: ['orderStatus', 'orderToOptions', 'options'],
+    });
 
-      if (!order) {
-        throw new NotFoundException('아이디에 해당하는 주문 없음.');
-      }
-
-      return order;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException(
-        '아이디로 주문 검색 중 오류 발생.',
-      );
+    if (!order) {
+      throw new NotFoundException('아이디에 해당하는 주문 없음.');
     }
+
+    return order;
   }
 
   async find(paginationDto: PaginationDto, user: User) {

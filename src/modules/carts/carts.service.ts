@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateCartDto } from '../../dtos/create-cart.dto';
 import { PaginationDto } from '../../dtos/pagination.dto';
@@ -33,48 +29,32 @@ export class CartsService {
   }
 
   async update(id: number, updateCartDto: UpdateCartDto, user: User) {
-    try {
-      const { quantity } = updateCartDto;
+    const { quantity } = updateCartDto;
 
-      const cart = await this.cartsRepository.findOne({
-        where: { id, user: { id: user.id } },
-      });
+    const cart = await this.cartsRepository.findOne({
+      where: { id, user: { id: user.id } },
+    });
 
-      if (!cart) {
-        throw new NotFoundException('아이디에 해당하는 장바구니 없음.');
-      }
-
-      const price = cart.totalPrice / cart.totalQuantity;
-      cart.totalQuantity = quantity;
-      cart.totalPrice = price * cart.totalQuantity;
-
-      return await this.cartsRepository.save(cart);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException('장바구니 갱신 중 오류 발생.');
+    if (!cart) {
+      throw new NotFoundException('아이디에 해당하는 장바구니 없음.');
     }
+
+    const price = cart.totalPrice / cart.totalQuantity;
+    cart.totalQuantity = quantity;
+    cart.totalPrice = price * cart.totalQuantity;
+
+    return await this.cartsRepository.save(cart);
   }
 
   async delete(id: number, user: User) {
-    try {
-      const cart = await this.cartsRepository.findOne({
-        where: { id, user: { id: user.id } },
-      });
+    const cart = await this.cartsRepository.findOne({
+      where: { id, user: { id: user.id } },
+    });
 
-      if (!cart) {
-        throw new NotFoundException('아이디에 해당하는 장바구니 없음.');
-      }
-
-      return await this.cartsRepository.remove(cart);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException('장바구니 삭제 중 오류 발생.');
+    if (!cart) {
+      throw new NotFoundException('아이디에 해당하는 장바구니 없음.');
     }
+
+    return await this.cartsRepository.remove(cart);
   }
 }

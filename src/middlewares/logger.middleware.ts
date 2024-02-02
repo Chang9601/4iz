@@ -28,8 +28,8 @@ export class LoggerMiddleware implements NestMiddleware {
   use(request: Request, response: Response, next: NextFunction) {
     response.on('finish', () => {
       // url vs. originalUrl
-      // 요청의 URL 경로를 나타내며 프로토콜, 호스트 또는 쿼리 매개변수를 포함하지 않고 경로만 포함한다(e.g., https://google.com/users?id=23 -> /users).
-      // 요청한 원본 URL 경로을 나타내며 프로토콜, 호스트, 경로 매개변수 및 쿼리 매개변수를 포함한다(e.g., https://google.com/users?id=23 -> /users?id=23).
+      // url: 요청의 URL 경로를 나타내며 프로토콜, 호스트 또는 쿼리 매개변수를 포함하지 않고 경로만 포함한다(e.g., https://google.com/users?id=23 -> /users).
+      // originalUrl: 요청한 원본 URL 경로을 나타내며 프로토콜, 호스트, 경로 매개변수 및 쿼리 매개변수를 포함한다(e.g., https://google.com/users?id=23 -> /users?id=23).
       // url을 수정하는 미들웨어가 있을 경우 originalUrl은 수정되지 않고 원본 URL을 보존한다.
       const { method, originalUrl } = request;
       const { statusCode, statusMessage } = response;

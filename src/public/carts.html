@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>장바구니 목록</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
+      }
+
+      header {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        width: 100%;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .cart-container {
+        border: 1px solid #ccc;
+        margin: 10px;
+        padding: 10px;
+        text-align: center;
+      }
+
+      #status-message,
+      #auth-message {
+        text-align: center;
+        color: red;
+        margin-top: 10px;
+      }
+
+      #cart-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .pagination {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>장바구니 목록</h1>
+    </header>
+    <div class="container">
+      <label for="carts-per-page">페이지 당 장바구니 개수: </label>
+      <input type="number" id="carts-per-page" value="10" />
+      <button id="update-carts-per-page">수정</button>
+
+      <ul id="cart-list"></ul>
+      <div class="pagination">
+        <button id="previous-page">이전</button>
+        <button id="next-page">다음</button>
+      </div>
+      <p id="total-carts"></p>
+
+      <p id="status-message"></p>
+
+      <div class="back-link">
+        <a href="#" onclick="goHome()">홈으로</a>
+        <a href="#" id="order-link" onclick="goOrder()">주문하기</a>
+      </div>
+    </div>
+
+    <p id="auth-message"></p>
+
+    <script src="./common.js"></script>
+
+    <script>
+      const authMessage = document.getElementById('auth-message');
+      const statusMessage = document.getElementById('status-message');
+
+      function goHome() {
+        window.location.href = 'index.html';
+      }
+
+      function goOrder() {
+        window.location.href = 'order-form.html';
+      }
+
+      function isNumeric(input) {
+        return /^[1-9][0-9]*$/.test(input);
+      }
+
+      function getQueryParams() {
+        const queryParams = {};
+        const queryString = window.location.search.slice(1);
+        const paramPairs = queryString.split('&');
+
+        paramPairs.forEach((pair) => {
+          const [key, value] = pair.split('=');
+          queryParams[key] = decodeURIComponent(value);
+        });
+
+        return queryParams;
+      }
+
+      async function deleteCart(id) {
+        try {
+          const response = await fetch(`/carts/${id}`, { method: 'DELETE' });
+          const status = response.status;
+
+          if (status === 204) {
+            statusMessage.textContent = '장바구니 삭제 완료';
+          } else if (status === 404) {
+            throw new Error(404);
+          } else if (status === 500) {
+            throw new Error(500);
+          }
+        } catch (error) {
+          const { message } = error;
+
+          if (message === '404') {
+            statusMessage.textContent = '존재하지 않는 장바구니';
+          } else if (message === '500') {
+            statusMessage.textContent = '오류 발생';
+          }
+        }
+      }
+
+      async function updateCart(id, quantity) {
+        try {
+          const response = await fetch(`/carts/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              quantity,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const status = response.status;
+
+          if (status === 200) {
+            statusMessage.textContent = '장바구니 갱신 완료';
+          } else if (status === 404) {
+            throw new Error(404);
+          } else if (status === 500) {
+            throw new Error(500);
+          }
+        } catch (error) {
+          const { message } = error;
+
+          if (message === '404') {
+            statusMessage.textContent = '존재하지 않는 장바구니';
+          } else if (message === '500') {
+            statusMessage.textContent = '오류 발생';
+          }
+        }
+      }
+
+      const queryParams = getQueryParams();
+
+      let currentPage = parseInt(queryParams.offset) || 1;
+      let cartsPerPage = parseInt(queryParams.limit) || 10;
+
+      async function fetchCarts(offset, limit) {
+        try {
+          const response = await fetch(
+            `/carts?offset=${offset}&limit=${limit}`,
+          );
+          const status = response.status;
+
+          if (status === 401) {
+            throw new Error(401);
+          } else if (status === 404) {
+            throw new Error(404);
+          } else if (status === 500) {
+            throw new Error(500);
+          }
+
+          const data = await response.json();
+
+          const carts = data.carts;
+          const state = data.pageState;
+
+          const cartList = document.getElementById('cart-list');
+          cartList.innerHTML = '';
+
+          carts.forEach(async (cart) => {
+            const { id: cartId, options, totalPrice, totalQuantity } = cart;
+            const [option] = cart.options;
+            const { color, size } = option;
+
+            const optionId = option.id;
+            const response = await fetch(`/items/options/${optionId}`);
+            const item = await response.json();
+
+            const { id: itemId, name } = item;
+
+            const cartContainer = document.createElement('div');
+            cartContainer.classList.add('cart-container');
+
+            const listCart = document.createElement('li');
+            listCart.innerHTML = `
+        <p>상품명: <a href="item.html?id=${itemId}">${name}</a></p>
+        <p>크기: ${size}</p>
+        <p>색상: ${color}</p>
+        <p>총액: ${totalPrice}원</p>
+        <p>총수량: ${totalQuantity}개</p>
+      `;
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '삭제';
+            deleteButton.addEventListener('click', async () => {
+              await deleteCart(cartId);
+              location.reload();
+              fetchCarts(currentPage, cartsPerPage);
+            });
+
+            const updateButton = document.createElement('button');
+            updateButton.textContent = '수정';
+            updateButton.addEventListener('click', async () => {
+              const quantity = prompt('새 수량');
+              if (quantity !== null && isNumeric(quantity)) {
+                await updateCart(cartId, parseInt(quantity));
+                fetchCarts(currentPage, cartsPerPage);
+              } else {
+                statusMessage.textContent = '자연수만 가능';
+              }
+            });
+
+            listCart.appendChild(deleteButton);
+            listCart.appendChild(updateButton);
+
+            cartContainer.appendChild(listCart);
+            cartList.appendChild(cartContainer);
+          });
+
+          const previousPageButton = document.getElementById('previous-page');
+          const nextPageButton = document.getElementById('next-page');
+          const totalCartsElement = document.getElementById('total-carts');
+
+          previousPageButton.disabled = !state.isPreviousPageValid;
+          nextPageButton.disabled = !state.isNextPageValid;
+
+          currentPage = state.currentPage;
+          const total = state.total;
+
+          totalCartsElement.textContent = `장바구니 개수: ${total}개`;
+        } catch (error) {
+          const { message } = error;
+
+          if (message === '401') {
+            statusMessage.textContent = '로그인 필요';
+          } else if (message === '404') {
+            statusMessage.textContent = '빈 장바구니';
+            document.getElementById('order-link').style.display = 'none';
+          } else if (message === '500') {
+            statusMessage.textContent = '오류 발생';
+          } else {
+            statusMessage.textContent = '네트워크 오류 발생';
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        const formContainer = document.querySelector('.container');
+
+        const authenticated = await isAuthenticated();
+
+        if (!authenticated) {
+          formContainer.style.display = 'none';
+          window.location.href = 'signin.html';
+        }
+      });
+
+      document
+        .getElementById('update-carts-per-page')
+        .addEventListener('click', () => {
+          const newCartsPerPage = parseInt(
+            document.getElementById('carts-per-page').value,
+            10,
+          );
+
+          if (isNumeric(newCartsPerPage)) {
+            cartsPerPage = newCartsPerPage;
+            currentPage = 1;
+            fetchCarts(currentPage, cartsPerPage);
+          }
+        });
+
+      document.getElementById('previous-page').addEventListener('click', () => {
+        fetchCarts(currentPage - 1, cartsPerPage);
+      });
+      document.getElementById('next-page').addEventListener('click', () => {
+        fetchCarts(currentPage + 1, cartsPerPage);
+      });
+
+      fetchCarts(currentPage, cartsPerPage);
+    </script>
+  </body>
+</html>

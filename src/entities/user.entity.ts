@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 import { Cart } from './cart.entity';
 import { Order } from './order.entity';
-import { Role } from '../common/enums/common.enum';
+import { OAuthProvider, Role } from '../common/enums/common.enum';
 
 @Entity('users')
 export class User {
@@ -33,8 +33,28 @@ export class User {
     length: 500,
     name: 'refresh_token',
     nullable: true,
+    default: null,
   })
   refreshToken: string | null;
+
+  @Column({ name: 'oauth_provider', length: 100, default: OAuthProvider.NONE })
+  oAuthProvider: string;
+
+  @Column({
+    name: 'oauth_provider_id',
+    length: 300,
+    nullable: true,
+    default: null,
+  })
+  oAuthProviderId: string;
+
+  @Column({
+    name: 'oauth_provider_refresh_token',
+    length: 500,
+    nullable: true,
+    default: null,
+  })
+  oAuthProviderRefreshToken: string;
 
   @Column({
     type: 'enum',

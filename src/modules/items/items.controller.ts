@@ -4,7 +4,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
@@ -32,7 +31,8 @@ export class ItemsController {
     private readonly itemsService: ItemsService,
   ) {}
 
-  // 데코레이터 적용 순서 알아보기.
+  // 각 데코레이터의 표현식은 위에서 아래 방향으로 평가된다.
+  // 각 데코레이터의 결과는 아래에서 위로 함수를 호출한다.
   @ApiNotFoundResponse({
     description: '상품 검색 실패.',
   })
@@ -45,7 +45,7 @@ export class ItemsController {
   @CacheKey('items')
   @UseInterceptors(HttpCacheInterceptor)
   @Get('/:id')
-  async getItem(@Param('id', ParseIntPipe) id: number) {
+  async getItem(@Param('id') id: number) {
     return await this.itemsService.findOne(id);
   }
 
@@ -73,7 +73,7 @@ export class ItemsController {
 
   @HttpCode(HttpStatus.OK)
   @Get('/options/:id')
-  async getItemByOptionId(@Param('id', ParseIntPipe) id: number) {
+  async getItemByOptionId(@Param('id') id: number) {
     return await this.itemsService.findOneByOptionId(id);
   }
 

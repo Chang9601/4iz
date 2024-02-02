@@ -9,7 +9,9 @@ import { plainToInstance } from 'class-transformer';
 import { Observable, map } from 'rxjs';
 
 // DTO를 매개변수로 받는 데코레이터로 DTO를 기반으로 응답 데이터를 직렬화하기 위해 SerializeInterceptor를 적용한다.
+// 데코레이터 팩토리는 데코레이터가 실행시간에 호출할 표현식을 반환하는 함수이다.
 export function Serialize(dto: any) {
+  // 데코레이터 함수
   return UseInterceptors(new SerializeInterceptor(dto));
 }
 

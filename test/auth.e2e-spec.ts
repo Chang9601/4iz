@@ -121,6 +121,11 @@ describe('Authentication E2E Test', () => {
 
   describe('signIn', () => {
     it('should throw BadRequestException for an invalid email', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send(createUserDto)
+        .expect(HttpStatus.CREATED);
+
       credentials.email = 'sfaslkf@naver.com';
 
       await request(app.getHttpServer())
@@ -130,6 +135,11 @@ describe('Authentication E2E Test', () => {
     });
 
     it('should throw BadRequestException for an invalid password', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send(createUserDto)
+        .expect(HttpStatus.CREATED);
+
       credentials.password = '24391!@svz';
 
       await request(app.getHttpServer())
@@ -150,11 +160,11 @@ describe('Authentication E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'].map(
         (cookie: string) => cookie.split(';')[0],
       );
+
+      expect(cookies).toBeDefined();
 
       const accessToken = cookies
         .find((cookie: string) => cookie.includes('access_token'))
@@ -185,9 +195,9 @@ describe('Authentication E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       let cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
 
       response = await request(app.getHttpServer())
         .post('/auth/signout')

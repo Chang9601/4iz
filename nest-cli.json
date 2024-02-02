@@ -11,6 +11,8 @@
           "dtoFileNameSuffix": [".dto.ts"]
         }
       }
-    ]
+    ],
+    "assets": ["public/**/*", "views/**/*"],
+    "watchAssets": true
   }
 }

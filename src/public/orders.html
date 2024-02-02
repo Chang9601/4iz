@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>장바구니 목록</title>
+    <title>주문 목록</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -31,7 +31,7 @@
         text-align: center;
       }
 
-      .cart-container {
+      .order-container {
         border: 1px solid #ccc;
         margin: 10px;
         padding: 10px;
@@ -45,7 +45,7 @@
         margin-top: 10px;
       }
 
-      #cart-list {
+      #order-list {
         list-style-type: none;
         padding: 0;
       }
@@ -57,25 +57,24 @@
   </head>
   <body>
     <header>
-      <h1>장바구니 목록</h1>
+      <h1>주문 목록</h1>
     </header>
     <div class="container">
-      <label for="carts-per-page">페이지 당 장바구니 개수: </label>
-      <input type="number" id="carts-per-page" value="10" />
-      <button id="update-carts-per-page">수정</button>
+      <label for="orders-per-page">페이지 당 주문 개수: </label>
+      <input type="number" id="orders-per-page" value="10" />
+      <button id="update-orders-per-page">수정</button>
 
-      <ul id="cart-list"></ul>
+      <ul id="order-list"></ul>
       <div class="pagination">
         <button id="previous-page">이전</button>
         <button id="next-page">다음</button>
       </div>
-      <p id="total-carts"></p>
+      <p id="total-orders"></p>
 
       <p id="status-message"></p>
 
       <div class="back-link">
         <a href="#" onclick="goHome()">홈으로</a>
-        <a href="#" id="order-link" onclick="goOrder()">주문하기</a>
       </div>
     </div>
 
@@ -91,19 +90,8 @@
         window.location.href = 'index.html';
       }
 
-      function goOrder() {
-        window.location.href = 'order-form.html';
-      }
-
       function isNumeric(input) {
         return /^[1-9][0-9]*$/.test(input);
-      }
-
-      async function isAuthenticated() {
-        const response = await fetch('/auth/whoami');
-        const status = response.status;
-
-        return status === 200 ? true : false;
       }
 
       function getQueryParams() {
@@ -119,13 +107,13 @@
         return queryParams;
       }
 
-      async function deleteCart(id) {
+      async function cancelOrder(id) {
         try {
-          const response = await fetch(`/carts/${id}`, { method: 'DELETE' });
+          const response = await fetch(`/orders/${id}`, { method: 'DELETE' });
           const status = response.status;
 
           if (status === 204) {
-            statusMessage.textContent = '장바구니 삭제 완료';
+            statusMessage.textContent = '주문 취소 완료';
           } else if (status === 404) {
             throw new Error(404);
           } else if (status === 500) {
@@ -135,53 +123,53 @@
           const { message } = error;
 
           if (message === '404') {
-            statusMessage.textContent = '존재하지 않는 장바구니';
+            statusMessage.textContent = '존재하지 않는 주문';
           } else if (message === '500') {
             statusMessage.textContent = '오류 발생';
           }
         }
       }
 
-      async function updateCart(id, quantity) {
-        try {
-          const response = await fetch(`/carts/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify({
-              quantity,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          const status = response.status;
+      // async function updateOrder(id, quantity) {
+      //   try {
+      //     const response = await fetch(`/orders/${id}`, {
+      //       method: 'PATCH',
+      //       body: JSON.stringify({
+      //         quantity,
+      //       }),
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //       },
+      //     });
+      //     const status = response.status;
 
-          if (status === 200) {
-            statusMessage.textContent = '장바구니 갱신 완료';
-          } else if (status === 404) {
-            throw new Error(404);
-          } else if (status === 500) {
-            throw new Error(500);
-          }
-        } catch (error) {
-          const { message } = error;
+      //     if (status === 200) {
+      //       statusMessage.textContent = '주문 갱신 완료';
+      //     } else if (status === 404) {
+      //       throw new Error(404);
+      //     } else if (status === 500) {
+      //       throw new Error(500);
+      //     }
+      //   } catch (error) {
+      //     const { message } = error;
 
-          if (message === '404') {
-            statusMessage.textContent = '존재하지 않는 장바구니';
-          } else if (message === '500') {
-            statusMessage.textContent = '오류 발생';
-          }
-        }
-      }
+      //     if (message === '404') {
+      //       statusMessage.textContent = '존재하지 않는 주문';
+      //     } else if (message === '500') {
+      //       statusMessage.textContent = '오류 발생';
+      //     }
+      //   }
+      // }
 
       const queryParams = getQueryParams();
 
       let currentPage = parseInt(queryParams.offset) || 1;
-      let cartsPerPage = parseInt(queryParams.limit) || 10;
+      let ordersPerPage = parseInt(queryParams.limit) || 10;
 
-      async function fetchCarts(offset, limit) {
+      async function fetchOrders(offset, limit) {
         try {
           const response = await fetch(
-            `/carts?offset=${offset}&limit=${limit}`,
+            `/orders?offset=${offset}&limit=${limit}`,
           );
           const status = response.status;
 
@@ -195,64 +183,71 @@
 
           const data = await response.json();
 
-          const carts = data.carts;
+          const orders = data.orders;
           const state = data.pageState;
 
-          const cartList = document.getElementById('cart-list');
-          cartList.innerHTML = '';
+          const orderList = document.getElementById('order-list');
+          orderList.innerHTML = '';
 
-          carts.forEach(async (cart) => {
-            const { id: cartId, options, totalPrice, totalQuantity } = cart;
-            const [option] = cart.options;
-            const { color, size } = option;
+          orders.forEach(async (order) => {
+            const {
+              id,
+              // name,
+              // phoneNumber,
+              // email,
+              streetAddress,
+              address,
+              zipcode,
+              totalPrice,
+              totalQuantity,
+              orderNumber,
+              orderStatus,
+              options,
+            } = order;
 
-            const optionId = option.id;
-            const response = await fetch(`/items/options/${optionId}`);
-            const item = await response.json();
+            const orderContainer = document.createElement('div');
+            orderContainer.classList.add('order-container');
 
-            const { id: itemId, name } = item;
-
-            const cartContainer = document.createElement('div');
-            cartContainer.classList.add('cart-container');
-
-            const listCart = document.createElement('li');
-            listCart.innerHTML = `
-        <p>상품명: <a href="item.html?id=${itemId}">${name}</a></p>
-        <p>크기: ${size}</p>
-        <p>색상: ${color}</p>
+            const listOrder = document.createElement('li');
+            listOrder.innerHTML = `
+        <p>주문번호: <a href="order.html?id=${id}">${orderNumber}</a></p>
+        <p>주문상태: ${orderStatus}</p>
         <p>총액: ${totalPrice}원</p>
         <p>총수량: ${totalQuantity}개</p>
-      `;
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = '삭제';
-            deleteButton.addEventListener('click', async () => {
-              await deleteCart(cartId);
+        <p>도로명 주소: ${streetAddress}</p>
+        <p>상세 주소: ${address}</p>
+        <p>우편번호: ${zipcode}</p>
+        `;
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = '취소';
+            cancelButton.addEventListener('click', async () => {
+              await cancelOrder(id);
               location.reload();
-              fetchCarts(currentPage, cartsPerPage);
+              fetchOrders(currentPage, ordersPerPage);
             });
 
-            const updateButton = document.createElement('button');
-            updateButton.textContent = '수정';
-            updateButton.addEventListener('click', async () => {
-              const quantity = prompt('새 수량');
-              if (quantity !== null && isNumeric(quantity)) {
-                await updateCart(cartId, parseInt(quantity));
-                fetchCarts(currentPage, cartsPerPage);
-              } else {
-                statusMessage.textContent = '자연수만 가능';
-              }
-            });
+            // const updateButton = document.createElement('button');
+            // updateButton.textContent = '수정';
+            // updateButton.addEventListener('click', async () => {
+            //   const quantity = prompt('새 수량');
+            //   if (quantity !== null && isNumeric(quantity)) {
+            //     await updateOrder(orderId, parseInt(quantity));
+            //     fetchOrders(currentPage, ordersPerPage);
+            //   } else {
+            //     statusMessage.textContent = '자연수만 가능';
+            //   }
+            // });
 
-            listCart.appendChild(deleteButton);
-            listCart.appendChild(updateButton);
+            listOrder.appendChild(cancelButton);
+            // listOrder.appendChild(updateButton);
 
-            cartContainer.appendChild(listCart);
-            cartList.appendChild(cartContainer);
+            orderContainer.appendChild(listOrder);
+            orderList.appendChild(orderContainer);
           });
 
           const previousPageButton = document.getElementById('previous-page');
           const nextPageButton = document.getElementById('next-page');
-          const totalCartsElement = document.getElementById('total-carts');
+          const totalOrdersElement = document.getElementById('total-orders');
 
           previousPageButton.disabled = !state.isPreviousPageValid;
           nextPageButton.disabled = !state.isNextPageValid;
@@ -260,15 +255,14 @@
           currentPage = state.currentPage;
           const total = state.total;
 
-          totalCartsElement.textContent = `장바구니 개수: ${total}개`;
+          totalOrdersElement.textContent = `주문 개수: ${total}개`;
         } catch (error) {
           const { message } = error;
 
           if (message === '401') {
             statusMessage.textContent = '로그인 필요';
           } else if (message === '404') {
-            statusMessage.textContent = '빈 장바구니';
-            document.getElementById('order-link').style.display = 'none';
+            statusMessage.textContent = '빈 주문';
           } else if (message === '500') {
             statusMessage.textContent = '오류 발생';
           } else {
@@ -289,28 +283,28 @@
       });
 
       document
-        .getElementById('update-carts-per-page')
+        .getElementById('update-orders-per-page')
         .addEventListener('click', () => {
-          const newCartsPerPage = parseInt(
-            document.getElementById('carts-per-page').value,
+          const newOrdersPerPage = parseInt(
+            document.getElementById('orders-per-page').value,
             10,
           );
 
-          if (isNumeric(newCartsPerPage)) {
-            cartsPerPage = newCartsPerPage;
+          if (isNumeric(newOrdersPerPage)) {
+            ordersPerPage = newOrdersPerPage;
             currentPage = 1;
-            fetchCarts(currentPage, cartsPerPage);
+            fetchOrders(currentPage, ordersPerPage);
           }
         });
 
       document.getElementById('previous-page').addEventListener('click', () => {
-        fetchCarts(currentPage - 1, cartsPerPage);
+        fetchOrders(currentPage - 1, ordersPerPage);
       });
       document.getElementById('next-page').addEventListener('click', () => {
-        fetchCarts(currentPage + 1, cartsPerPage);
+        fetchOrders(currentPage + 1, ordersPerPage);
       });
 
-      fetchCarts(currentPage, cartsPerPage);
+      fetchOrders(currentPage, ordersPerPage);
     </script>
   </body>
 </html>

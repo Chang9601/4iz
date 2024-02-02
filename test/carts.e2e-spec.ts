@@ -61,9 +61,9 @@ describe('Cart E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
 
       response = await request(app.getHttpServer())
         .post('/carts')
@@ -88,9 +88,9 @@ describe('Cart E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
 
       await request(app.getHttpServer())
         .post('/carts')
@@ -123,9 +123,9 @@ describe('Cart E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
 
       await request(app.getHttpServer())
         .post('/carts')
@@ -147,6 +147,29 @@ describe('Cart E2E Test', () => {
       expect(pageState.total).toBe(3);
       expect(pageState.currentPage).toBe(1);
     });
+
+    it('should throw NotFoundException for not having any carts', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send(createUserDto)
+        .expect(HttpStatus.CREATED);
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/signin')
+        .send(credentials)
+        .expect(HttpStatus.OK);
+
+      const headers = response.headers;
+      const cookies = headers['set-cookie'];
+
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
+        .get('/carts')
+        .set('Cookie', cookies)
+        .query(paginationDto)
+        .expect(HttpStatus.NOT_FOUND);
+    });
   });
 
   describe('updateCart', () => {
@@ -162,11 +185,11 @@ describe('Cart E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
 
-      response = await request(app.getHttpServer())
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
         .post('/carts')
         .set('Cookie', cookies)
         .send(createCartDto)
@@ -195,23 +218,23 @@ describe('Cart E2E Test', () => {
         .send(createUserDto)
         .expect(HttpStatus.CREATED);
 
-      let response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/auth/signin')
         .send(credentials)
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
 
-      response = await request(app.getHttpServer())
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
         .post('/carts')
         .set('Cookie', cookies)
         .send(createCartDto)
         .expect(HttpStatus.CREATED);
 
-      response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/carts/100000`)
         .set('Cookie', cookies)
         .send({ quantity: 10 })
@@ -232,11 +255,11 @@ describe('Cart E2E Test', () => {
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
 
-      response = await request(app.getHttpServer())
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
         .post('/carts')
         .set('Cookie', cookies)
         .send(createCartDto)
@@ -253,7 +276,7 @@ describe('Cart E2E Test', () => {
 
       const prevLength = carts.length;
 
-      response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/carts/${response.body.carts[0].id}`)
         .set('Cookie', cookies)
         .expect(HttpStatus.NO_CONTENT);
@@ -278,26 +301,25 @@ describe('Cart E2E Test', () => {
         .send(createUserDto)
         .expect(HttpStatus.CREATED);
 
-      let response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/auth/signin')
         .send(credentials)
         .expect(HttpStatus.OK);
 
       const headers = response.headers;
-      expect(headers).toBeDefined();
-
       const cookies = headers['set-cookie'];
 
-      response = await request(app.getHttpServer())
+      expect(cookies).toBeDefined();
+
+      await request(app.getHttpServer())
         .post('/carts')
         .set('Cookie', cookies)
         .send(createCartDto)
         .expect(HttpStatus.CREATED);
 
-      response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/carts/100000`)
         .set('Cookie', cookies)
-        .send({ quantity: 10 })
         .expect(HttpStatus.NOT_FOUND);
     });
   });

@@ -32,10 +32,8 @@ describe('Item E2E Test', () => {
     });
 
     it('should throw NotFoundException for an invalid id', async () => {
-      const id = 10002;
-
       await request(app.getHttpServer())
-        .get(`/items/${id}`)
+        .get(`/items/10002`)
         .expect(HttpStatus.NOT_FOUND);
     });
   });

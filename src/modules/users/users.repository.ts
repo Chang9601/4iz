@@ -1,8 +1,4 @@
-import {
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-
+import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -23,29 +19,21 @@ export class UsersRepository extends Repository<User> {
   }
 
   async findUsers(paginationDto: PaginationDto) {
-    try {
-      const { limit: take, skip } = paginationDto;
+    const { limit: take, skip } = paginationDto;
 
-      const [users, total] = await this.usersRepository.findAndCount({
-        select: ['id', 'name', 'email', 'phoneNumber', 'birthday', 'roles'],
-        order: { name: 'ASC' },
-        take,
-        skip,
-      });
+    const [users, total] = await this.usersRepository.findAndCount({
+      select: ['id', 'name', 'email', 'phoneNumber', 'birthday', 'roles'],
+      order: { name: 'ASC' },
+      take,
+      skip,
+    });
 
-      const pageStateDto = new PageStateDto(total, paginationDto);
+    const pageStateDto = new PageStateDto(total, paginationDto);
 
-      if (pageStateDto.lastPage < pageStateDto.currentPage) {
-        throw new NotFoundException('존재하지 않는 페이지.');
-      }
-
-      return new PageDto(pageStateDto, users);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException('사용자 목록 검색 중 오류 발생.');
+    if (pageStateDto.lastPage < pageStateDto.currentPage) {
+      throw new NotFoundException('존재하지 않는 페이지.');
     }
+
+    return new PageDto(pageStateDto, users);
   }
 }

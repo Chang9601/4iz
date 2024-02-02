@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -110,7 +109,7 @@ export class CartsController {
   @Patch('/:id')
   async updateCart(
     @Req() request: RequestWithUser,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: number,
     @Body() updateCartDto: UpdateCartDto,
   ) {
     const { user } = request;
@@ -130,10 +129,7 @@ export class CartsController {
   @ApiCookieAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/:id')
-  async deleteCart(
-    @Req() request: RequestWithUser,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  async deleteCart(@Req() request: RequestWithUser, @Param('id') id: number) {
     const { user } = request;
 
     await this.cartsService.delete(id, user);

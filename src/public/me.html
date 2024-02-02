@@ -132,13 +132,6 @@
         window.location.href = 'index.html';
       }
 
-      async function isAuthenticated() {
-        const response = await fetch('/auth/whoami');
-        const status = response.status;
-
-        return status === 200 ? true : false;
-      }
-
       function getQueryParams() {
         const queryParams = {};
         const queryString = window.location.search.slice(1);

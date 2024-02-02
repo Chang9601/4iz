@@ -217,7 +217,7 @@
 
             const moveToSigninPage = confirm('로그인 페이지로 이동?');
             if (moveToSigninPage) {
-              window.location.href = 'signin.html';
+              window.location.href = '/signin';
             }
           } else if (message === '500') {
             statusMessage.textContent = '오류 발생';
@@ -295,7 +295,7 @@
           const { message } = error;
 
           if (message === '404') {
-            statusMessage.textContent = '존재하지 않는 주문';
+            statusMessage.textContent = '존재하지 않는 상품';
           } else if (message === '500') {
             statusMessage.textContent = '오류 발생';
           } else {

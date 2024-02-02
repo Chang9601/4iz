@@ -154,11 +154,13 @@ describe('UsersService', () => {
 
     it('should find a user by refresh token', async () => {
       const user = await usersService.create(createUserDto);
-      await usersService.setRefreshToken('my_refresh_token', user.id);
+      const { id } = user;
+      await usersService.setRefreshToken('my_refresh_token', id);
+      const option = buildOption({ id });
 
       const foundUser = await usersService.findByRefreshToken(
         'my_refresh_token',
-        user.id,
+        option,
       );
 
       expect(foundUser).toBeDefined();

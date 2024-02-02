@@ -11,6 +11,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
   imports: [PassportModule, UsersModule, JwtModule.register({ global: true })],
+  // 모듈 간 순환 종속성이 발생하기 때문에 모듈은 프로바이더처럼 주입해서 사용이 불가능하다.
   providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   controllers: [AuthController],
 })

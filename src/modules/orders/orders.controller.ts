@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -76,8 +75,10 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   @Serialize(OrderDto)
   @Get('/:id')
-  async getOrder(@Param('id', ParseIntPipe) id: number) {
-    return await this.ordersService.findOne(id);
+  async getOrder(@Req() request: RequestWithUser, @Param('id') id: number) {
+    const { user } = request;
+
+    return await this.ordersService.findOne(id, user);
   }
 
   @ApiUnauthorizedResponse({
@@ -119,10 +120,7 @@ export class OrdersController {
   @ApiCookieAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/:id')
-  async cancelOrder(
-    @Req() request: RequestWithUser,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  async cancelOrder(@Req() request: RequestWithUser, @Param('id') id: number) {
     const { user } = request;
 
     await this.ordersService.delete(id, user);

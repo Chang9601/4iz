@@ -1,9 +1,6 @@
 import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 import { PaginationDto } from '../../dtos/pagination.dto';
 import { PageDto } from '../../dtos/page.dto';
@@ -25,149 +22,121 @@ export class ItemsRepository extends Repository<Item> {
   }
 
   async findItem(id: number) {
-    try {
-      const INCLUDED_FIELDS = [
-        'item.id',
-        'item.name',
-        'item.gender',
-        'item.isNew',
-        'item.price',
-        'item.discountRate',
-        'item.description',
-        'item.releaseDate',
-      ];
+    const INCLUDED_FIELDS = [
+      'item.id',
+      'item.name',
+      'item.gender',
+      'item.isNew',
+      'item.price',
+      'item.discountRate',
+      'item.description',
+      'item.releaseDate',
+    ];
 
-      const queryBuilder = this.itemsRepository
-        .createQueryBuilder('item')
-        .select(INCLUDED_FIELDS)
-        .where('item.id = :id', { id });
+    const queryBuilder = this.itemsRepository
+      .createQueryBuilder('item')
+      .select(INCLUDED_FIELDS)
+      .where('item.id = :id', { id });
 
-      queryBuilder
-        .innerJoinAndSelect(
-          'item.options',
-          'options',
-          'options.item_id = item.id',
-        )
-        .innerJoinAndSelect('item.images', 'images', 'images.item_id = item.id')
-        .innerJoinAndSelect(
-          'item.categories',
-          'categories',
-          'item_categories.category_id = categories.id',
-        );
-
-      const item = await queryBuilder.getOne();
-
-      if (!item) {
-        throw new NotFoundException('아이디에 해당하는 상품 없음.');
-      }
-
-      // fetch() 메서드로 전달하는 쿼리 매개변수가 검증을 통과하지 못하는 오류로 임시방편으로 4개의 옵션만 추출한다.
-      const indexes = [0, 24, 48, 72];
-      item.options = indexes.map((index) => item.options[index]);
-
-      return item;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException(
-        '아이디로 상품 검색 중 오류 발생.',
+    queryBuilder
+      .innerJoinAndSelect(
+        'item.options',
+        'options',
+        'options.item_id = item.id',
+      )
+      .innerJoinAndSelect('item.images', 'images', 'images.item_id = item.id')
+      .innerJoinAndSelect(
+        'item.categories',
+        'categories',
+        'item_categories.category_id = categories.id',
       );
+
+    const item = await queryBuilder.getOne();
+
+    if (!item) {
+      throw new NotFoundException('아이디에 해당하는 상품 없음.');
     }
+
+    // fetch() 메서드로 전달하는 쿼리 매개변수가 검증을 통과하지 못하는 오류로 임시방편으로 4개의 옵션만 추출한다.
+    const indexes = [0, 24, 48, 72];
+    item.options = indexes.map((index) => item.options[index]);
+
+    return item;
   }
 
   // 쿼리 수정 필요.
   async findItems(paginationDto: PaginationDto) {
-    try {
-      const {
-        limit: take,
-        search,
-        skip,
-        sort,
-        color,
-        gender,
-        size,
-      } = paginationDto;
+    const {
+      limit: take,
+      search,
+      skip,
+      sort,
+      color,
+      gender,
+      size,
+    } = paginationDto;
 
-      const queryBuilder = new QueryBuilder(sort);
+    const queryBuilder = new QueryBuilder(sort);
 
-      const sortQuery = queryBuilder.buildSortQuery();
-      const orderQuery = queryBuilder.buildOrderQuery();
+    const sortQuery = queryBuilder.buildSortQuery();
+    const orderQuery = queryBuilder.buildOrderQuery();
 
-      const [items, total] = await this.itemsRepository.findAndCount({
-        where: [
-          {
-            name: Like(`%${search}%`),
-          },
-          {
-            description: Like(`%${search}%`),
-          },
-          {
-            categories: [
-              {
-                name: Like(`%${search}%`),
-              },
-            ],
-          },
-          {
-            gender: In([gender]),
-          },
-          { options: [{ color: In([color]), size: In([size]) }] },
-        ],
-        relations: ['images', 'categories'],
-        select: [
-          'id',
-          'name',
-          'gender',
-          'isNew',
-          'price',
-          'discountRate',
-          'releaseDate',
-        ],
-        order: {
-          [sortQuery]: orderQuery,
+    const [items, total] = await this.itemsRepository.findAndCount({
+      where: [
+        {
+          name: Like(`%${search}%`),
         },
-        take,
-        skip,
-      });
+        {
+          description: Like(`%${search}%`),
+        },
+        {
+          categories: [
+            {
+              name: Like(`%${search}%`),
+            },
+          ],
+        },
+        {
+          gender: In([gender]),
+        },
+        { options: [{ color: In([color]), size: In([size]) }] },
+      ],
+      relations: ['images', 'categories'],
+      select: [
+        'id',
+        'name',
+        'gender',
+        'isNew',
+        'price',
+        'discountRate',
+        'releaseDate',
+      ],
+      order: {
+        [sortQuery]: orderQuery,
+      },
+      take,
+      skip,
+    });
 
-      const pageStateDto = new PageStateDto(total, paginationDto);
+    const pageStateDto = new PageStateDto(total, paginationDto);
 
-      if (pageStateDto.lastPage < pageStateDto.currentPage) {
-        throw new NotFoundException('존재하지 않는 페이지.');
-      }
-
-      return new PageDto(pageStateDto, items);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException('상품 목록 검색 중 오류 발생.');
+    if (pageStateDto.lastPage < pageStateDto.currentPage) {
+      throw new NotFoundException('존재하지 않는 페이지.');
     }
+
+    return new PageDto(pageStateDto, items);
   }
 
   async findItemByOptionId(id: number) {
-    try {
-      const option = buildOption({ options: { id } });
+    const option = buildOption({ options: { id } });
 
-      const item = await this.itemsRepository.findOne(option);
+    const item = await this.itemsRepository.findOne(option);
 
-      if (!item) {
-        throw new NotFoundException('존재하지 않는 상품.');
-      }
-
-      return item;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException(
-        '옵션에 해당하는 상품 검색 중 오류 발생.',
-      );
+    if (!item) {
+      throw new NotFoundException('존재하지 않는 상품.');
     }
+
+    return item;
   }
 
   // async findOptions(getOptions: GetOptionsDto) {

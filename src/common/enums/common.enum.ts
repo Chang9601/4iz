@@ -4,6 +4,12 @@ export enum Role {
   ADMIN = 'admin',
 }
 
+export enum OAuthProvider {
+  NONE = 'none',
+  GOOGLE = 'google',
+  NAVER = 'naver',
+}
+
 export enum Token {
   ACCESS_TOKEN = 'access_token',
   REFRESH_TOKEN = 'refresh_token',

@@ -17,6 +17,7 @@ export class AllExceptionFilter implements ExceptionFilter {
   // 인자를 검색할 때 적절한 컨텍스트(e.g., HTTP, RPC(마이크로서비스) 또는 WebSockets)를 선택할 수 있다.
   // 즉, ArgumentsHost는 핸들러의 인자 위에 추상화 역할을 한다
   catch(exception: unknown, host: ArgumentsHost): void {
+    // HTTP 어댑터를 사용하여 응답을 전달하는 플랫폼에 중립적인 코드이다.
     const { httpAdapter } = this.httpAdpaterHost;
 
     const context = host.switchToHttp();
@@ -37,7 +38,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         error: string;
       };
 
-      // 만약 예외가 하나가 해당 예외의 메시지만 선택한다.
+      // 만약 예외가 하나가 해당 예외 메시지만 선택한다.
       // 만약 예외가 여러 개일 경우 모든 예외 메시지를 '|'로 분리하여 합친다.
       message = Array.isArray(exceptionResponse.message)
         ? exceptionResponse.message.join(' | ')

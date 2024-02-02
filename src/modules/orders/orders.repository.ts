@@ -1,7 +1,4 @@
-import {
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
@@ -22,6 +19,7 @@ export class OrdersRepository extends Repository<Order> {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
+    // TypeORM이 제공하는 DataSource 객체.
     private dataSource: DataSource,
   ) {
     super(
@@ -31,10 +29,14 @@ export class OrdersRepository extends Repository<Order> {
     );
   }
 
+  // TypeORM 트랙잭션 처리 방법.
+  //   1. QueryRunner 적용.
+  //   2. transaction 함수를 직접 사용하여 적용.
   async createOne(createOrderDto: CreateOrderDto, user: User) {
     const { streetAddress, address, zipcode } = createOrderDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
+    // QueryRunner를 DB에 연결한 후 트랜잭션을 시작한다.
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -119,63 +121,58 @@ export class OrdersRepository extends Repository<Order> {
 
       await queryRunner.manager.save(OrderToOption, orderToOptions);
 
+      // 트랜잭션을 커밋하여 영속화(persistence)를 수행한다.
       await queryRunner.commitTransaction();
 
       return order;
     } catch (error) {
+      // 오류 발생 시 트랜잭션을 롤백한다.
       await queryRunner.rollbackTransaction();
 
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('주문 생성 중 오류 발생.');
+
+      throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
   async findOrders(paginationDto: PaginationDto, user: User) {
-    try {
-      const { limit: take, skip } = paginationDto;
+    const { limit: take, skip } = paginationDto;
 
-      const [orders, total] = await this.ordersRepository.findAndCount({
-        where: {
-          user: {
-            id: user.id,
-          },
+    const [orders, total] = await this.ordersRepository.findAndCount({
+      where: {
+        user: {
+          id: user.id,
         },
-        relations: ['orderStatus', 'options'],
-        select: [
-          'id',
-          'streetAddress',
-          'address',
-          'zipcode',
-          'totalPrice',
-          'totalQuantity',
-          'orderDate',
-          'orderNumber',
-        ],
-        order: {
-          id: 'ASC',
-        },
-        take,
-        skip,
-      });
+      },
+      relations: ['orderStatus', 'options'],
+      select: [
+        'id',
+        'streetAddress',
+        'address',
+        'zipcode',
+        'totalPrice',
+        'totalQuantity',
+        'orderDate',
+        'orderNumber',
+      ],
+      order: {
+        id: 'ASC',
+      },
+      take,
+      skip,
+    });
 
-      const pageStateDto = new PageStateDto(total, paginationDto);
+    const pageStateDto = new PageStateDto(total, paginationDto);
 
-      if (pageStateDto.lastPage < pageStateDto.currentPage) {
-        throw new NotFoundException('존재하지 않는 페이지.');
-      }
-
-      return new PageDto(pageStateDto, orders);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException('주문 목록 검색 중 오류 발생.');
+    if (pageStateDto.lastPage < pageStateDto.currentPage) {
+      throw new NotFoundException('존재하지 않는 페이지.');
     }
+
+    return new PageDto(pageStateDto, orders);
   }
 
   async deleteOne(id: number, user: User) {
@@ -238,7 +235,7 @@ export class OrdersRepository extends Repository<Order> {
         throw error;
       }
 
-      throw new InternalServerErrorException('주문 삭제 중 오류 발생.');
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -247,52 +244,42 @@ export class OrdersRepository extends Repository<Order> {
   // 데이터베이스 구조 수정 필요.
   // 상품의 아이디 배열을 반환한다.
   async findAll(id: number) {
-    try {
-      const [order] = await this.ordersRepository.find({
-        where: { id },
+    const [order] = await this.ordersRepository.find({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException('아이디에 해당하는 주문 없음.');
+    }
+
+    const orderToOptions = await this.ordersRepository.manager.find(
+      OrderToOption,
+      {
+        where: { order: { id: order.id } },
+        relations: ['option'],
+      },
+    );
+
+    if (!orderToOptions) {
+      throw new NotFoundException('아이디에 해당하는 주문-옵션 없음.');
+    }
+
+    const optionIds = orderToOptions.map(
+      (orderToOption) => orderToOption.option.id,
+    );
+    const itemIds: string[] = [];
+
+    for (const optionId of optionIds) {
+      const [foundOption] = await this.ordersRepository.manager.find(Option, {
+        where: {
+          id: optionId,
+        },
+        relations: ['item'],
       });
 
-      if (!order) {
-        throw new NotFoundException('아이디에 해당하는 주문 없음.');
-      }
-
-      const orderToOptions = await this.ordersRepository.manager.find(
-        OrderToOption,
-        {
-          where: { order: { id: order.id } },
-          relations: ['option'],
-        },
-      );
-
-      if (!orderToOptions) {
-        throw new NotFoundException('아이디에 해당하는 주문-옵션 없음.');
-      }
-
-      const optionIds = orderToOptions.map(
-        (orderToOption) => orderToOption.option.id,
-      );
-      const itemIds: string[] = [];
-
-      for (const optionId of optionIds) {
-        const [foundOption] = await this.ordersRepository.manager.find(Option, {
-          where: {
-            id: optionId,
-          },
-          relations: ['item'],
-        });
-
-        itemIds.push(foundOption.item.id.toString());
-      }
-
-      return itemIds;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException(
-        '상품의 아이디 배열 검색 중 오류 발생.',
-      );
+      itemIds.push(foundOption.item.id.toString());
     }
+
+    return itemIds;
   }
 }

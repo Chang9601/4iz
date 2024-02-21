@@ -19,6 +19,10 @@ main 브랜치의 docker-compose.yml 파일을 docker compose up --build 명령�
 - 애플리케이션: http://localhost:3000
 - Redis 웹 인터페이스: http://localhost:8081
 
+## 테스트
+- 단위 테스트: 애플리케이션 실행 후 docker compose exec app npm run test 명령 실행.
+- E2E 테스트: main 브랜치의 docker-compose.ci.yml 파일을 docker compose -f docker-compose.ci.yml up --build 명령으로 실행.
+
 ## 기술 스택
 |개발|
 | :----: |
@@ -27,7 +31,8 @@ main 브랜치의 docker-compose.yml 파일을 docker compose up --build 명령�
 |![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)|
 
 ## API
-https://chang-app.com/api 혹은 로컬에서 애플리케이션 실행 후 http://localhost:3000/api
+- https://chang-app.com/api
+- 로컬에서 애플리케이션 실행 후 http://localhost:3000/api
 
 ## 기록
 https://whooa27.blogspot.com/search/label/4iz

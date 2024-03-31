@@ -11,9 +11,6 @@
 ## 아키텍처
 ![Untitled (1)](https://github.com/Chang9601/4iz/assets/79137839/9d7ac052-3fc9-41e0-a685-12933f9cd4f5)
 
-## URL
-https://chang-app.com
-
 ## 실행
 main 브랜치의 docker-compose.yml 파일을 docker compose up --build 명령으로 실행.
 - 애플리케이션: http://localhost:3000
@@ -31,7 +28,6 @@ main 브랜치의 docker-compose.yml 파일을 docker compose up --build 명령�
 |![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)|
 
 ## API
-- https://chang-app.com/api
 - 로컬에서 애플리케이션 실행 후 http://localhost:3000/api
 
 ## 기록
